@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Recetas & KPIs – ERP PRENSAS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="manifest" href="manifest_recetas.json">
+<meta name="theme-color" content="#00e5ff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --bg:#05070b;--bg2:#0d1017;--panel:#121722;--border:#242b3b;
+  --accent:#00e5ff;--accent-soft:#00e5ff22;--text:#e5ecff;--muted:#93a1c6;--danger:#ff4b6a;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Roboto",system-ui,sans-serif}
+body{background:radial-gradient(circle at top,#141b2b 0,#05070b 55%);color:var(--text);min-height:100vh;}
+
+.topbar{
+  height:48px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;background:linear-gradient(90deg,#05070b,#101828);
+  border-bottom:1px solid #252b3a;box-shadow:0 4px 10px #0006;
+}
+.app-title{display:flex;align-items:center;gap:8px;font-size:14px;}
+.app-title span.dot{width:10px;height:10px;border-radius:50%;background:#ffd86f;box-shadow:0 0 10px #ffd86f;}
+.app-title strong{color:var(--accent);}
+.topbar-right{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);}
+.pill{padding:4px 10px;border-radius:999px;background:#060915;border:1px solid #252b3f;}
+.logout-btn{
+  padding:6px 10px;border-radius:999px;border:1px solid #30384f;
+  background:#05070b;color:var(--muted);font-size:11px;cursor:pointer;
+}
+.logout-btn:hover{background:#161b28;}
+
+.layout{display:flex;min-height:calc(100vh - 48px);}
+.side-nav{
+  width:210px;background:#070a11;border-right:1px solid #22283a;padding:10px;display:flex;flex-direction:column;gap:8px;
+}
+.side-nav h3{font-size:13px;color:var(--muted);margin-bottom:6px;}
+.nav-btn{
+  width:100%;text-align:left;padding:7px 10px;border-radius:8px;border:1px solid transparent;
+  background:#111725;color:var(--muted);font-size:12px;cursor:pointer;
+}
+.nav-btn.active{border-color:#2f80ed;background:#0b1629;color:var(--accent);}
+.nav-btn span{margin-right:6px;}
+
+.main-panel{flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.card{
+  background:var(--panel);border-radius:10px;border:1px solid var(--border);
+  padding:10px;box-shadow:0 10px 26px #0008;
+}
+.card h2{font-size:14px;margin-bottom:6px;color:var(--accent);}
+label{font-size:11px;color:var(--muted);margin-bottom:2px;}
+input,select,textarea{
+  width:100%;padding:6px 9px;border-radius:6px;border:1px solid #31384d;
+  background:#05070b;color:var(--text);font-size:12px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+.field-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:6px;}
+.field-row-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:6px;}
+.btn{
+  border-radius:999px;border:none;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-primary{background:linear-gradient(135deg,#00e5ff,#25c6ff);color:#001018;}
+.btn-secondary{background:#141b24;color:var(--muted);border:1px solid #273147;}
+.btn-outline{background:transparent;border:1px solid #2f3750;color:var(--muted);}
+.small{font-size:11px;color:var(--muted);}
+
+.table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px;}
+.table th,.table td{border-bottom:1px solid #222a3c;padding:4px 6px;white-space:nowrap;}
+.table th{
+  background:#050b17;position:sticky;top:0;
+  color:#cfe6ff;font-weight:600;
+}
+.table td{color:#e2ecff;}
+.table tr:nth-child(even){background:#151b25;}
+.table tr:hover{background:#1f2940;}
+
+.badge{padding:2px 7px;border-radius:999px;border:1px solid #2c3450;font-size:10px;color:var(--muted);}
+.badge-role{border-color:#16c784;color:#aaf1cc;background:#062416;}
+
+.section{display:none;}
+.section.active{display:block;}
+.chart-container{height:320px;}
+
+/* Toast / banner flotante */
+#toastContainer{
+  position:fixed;top:10px;right:10px;z-index:80;display:flex;flex-direction:column;gap:8px;
+}
+.toast{
+  min-width:260px;max-width:340px;background:#111726;border-radius:10px;
+  border:1px solid #2f80ed88;padding:10px 12px;font-size:12px;
+  box-shadow:0 12px 32px #000c;animation:slideIn .3s ease-out;
+}
+.toast-title{font-weight:600;color:var(--accent);margin-bottom:3px;}
+.toast-body{color:var(--muted);margin-bottom:6px;}
+.toast-close{background:transparent;border:none;color:#999;float:right;font-size:12px;cursor:pointer;}
+.toast-actions{display:flex;justify-content:flex-end;gap:6px;}
+.toast-actions button{
+  padding:4px 10px;border-radius:999px;border:1px solid #2f80ed88;
+  background:#172338;color:#cfe6ff;font-size:11px;cursor:pointer;
+}
+.toast-actions button:hover{background:#223453;}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+
+/* Scrollbar */
+::-webkit-scrollbar{height:6px;width:6px;}
+::-webkit-scrollbar-track{background:#05070b;}
+::-webkit-scrollbar-thumb{background:#333d55;border-radius:999px;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="app-title">
+    <span class="dot"></span>
+    <div><div style="font-size:12px;">Módulo Recetas & KPIs</div><strong>ERP PRENSAS</strong></div>
+  </div>
+  <div class="topbar-right">
+    <div class="pill" id="lblUser"></div>
+    <div class="pill">Rol: <span id="lblRol" class="badge badge-role">-</span></div>
+    <button class="logout-btn" id="btnLogout">Salir</button>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<div class="layout">
+  <aside class="side-nav">
+    <h3>Menú</h3>
+    <button class="nav-btn active" data-section="secRecetas"><span>📘</span>Recetas por matriz</button>
+    <button class="nav-btn" data-section="secKPIs"><span>📊</span>KPIs / Motivos</button>
+    <button class="nav-btn" data-section="secAlertas"><span>🚨</span>Alertas</button>
+    <button class="nav-btn" data-section="secSolicitudes"><span>📨</span>Solicitudes de recetas</button>
+    <button class="nav-btn" data-section="secHistorial"><span>🕓</span>Historial de recetas</button>
+    <a class="nav-btn" href="ERP_PRENSAS_ALUTIONS.html" style="margin-top:8px;">⬅ Volver a Operarios</a>
+  </aside>
+
+  <main class="main-panel">
+
+    <!-- RECETAS -->
+    <section id="secRecetas" class="section active">
+      <div class="card">
+        <h2>Recetas por matriz</h2>
+        <p class="small">
+          Define los rangos de velocidad y temperatura válidos por matriz. Las alertas se
+          generarán automáticamente cuando los registros de producción se salgan de estos límites.
+        </p>
+        <div class="field-row-3" style="margin-top:6px;">
+          <div>
+            <label>Matriz Ref.</label>
+            <input id="rcMatriz" placeholder="Código matriz" />
+          </div>
+          <div>
+            <label>Descripción</label>
+            <input id="rcDesc" placeholder="Perfil / referencia" />
+          </div>
+          <div>
+            <label>Comentario</label>
+            <input id="rcComentario" placeholder="Notas internas (opcional)" />
+          </div>
+        </div>
+        <div class="field-row-3">
+          <div>
+            <label>V. prensa mín (mm/s)</label>
+            <input type="number" id="rcVPmin" step="0.01" />
+          </div>
+          <div>
+            <label>V. prensa máx (mm/s)</label>
+            <input type="number" id="rcVPmax" step="0.01" />
+          </div>
+          <div>
+            <label>V. puller mín (mm/s)</label>
+            <input type="number" id="rcVUmin" step="0.01" />
+          </div>
+        </div>
+        <div class="field-row-3">
+          <div>
+            <label>V. puller máx (mm/s)</label>
+            <input type="number" id="rcVUmax" step="0.01" />
+          </div>
+          <div>
+            <label>Temp. tochos mín (°C)</label>
+            <input type="number" id="rcTmin" />
+          </div>
+          <div>
+            <label>Temp. tochos máx (°C)</label>
+            <input type="number" id="rcTmax" />
+          </div>
+        </div>
+<div class="field-row-3">
+  <div>
+    <label>Temp. matriz mín (°C)</label>
+    <input type="number" id="rcTMatrizMin" />
+  </div>
+  <div>
+    <label>Temp. matriz máx (°C)</label>
+    <input type="number" id="rcTMatrizMax" />
+  </div>
+  <div>
+    <label>Temp. contenedor mín (°C)</label>
+    <input type="number" id="rcTContMin" />
+  </div>
+</div>
+<div class="field-row-3">
+  <div>
+    <label>Temp. contenedor máx (°C)</label>
+    <input type="number" id="rcTContMax" />
+  </div>
+</div>
+
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <button class="btn btn-primary" id="btnGuardarReceta">Guardar / actualizar receta</button>
+          <button class="btn btn-outline" id="btnLimpiarReceta">Limpiar</button>
+        </div>
+
+        <h3 style="margin-top:10px;font-size:13px;">Recetas registradas</h3>
+        <div style="max-height:260px;overflow:auto;margin-top:4px;">
+          <table class="table" id="tblRecetas">
+            <thead>
+              <tr>
+  <th>Editar</th>
+  <th>Matriz</th><th>Descripción</th>
+  <th>V.P min</th><th>V.P max</th>
+  <th>V.U min</th><th>V.U max</th>
+  <th>T tocho min</th><th>T tocho max</th>
+  <th>T matriz min</th><th>T matriz max</th>
+  <th>T cont. min</th><th>T cont. max</th>
+  <th>Actualizado por</th>
+</tr>
+
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section id="secKPIs" class="section">
+      <div class="card">
+        <h2>KPIs – Motivos vs matrices</h2>
+        <div class="field-row">
+          <div>
+            <label>Fecha desde</label>
+            <input type="date" id="kpiDesde" />
+          </div>
+          <div>
+            <label>Fecha hasta</label>
+            <input type="date" id="kpiHasta" />
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <button class="btn btn-secondary" id="btnCargarKPIs">Cargar KPIs</button>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartMotivos"></canvas>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted);">
+          Eje X: combinación <strong>Matriz – Motivo</strong>. Altura de barra: número de registros en el rango de fechas.
+        </div>
+      </div>
+    </section>
+
+    <!-- ALERTAS -->
+    <section id="secAlertas" class="section">
+      <div class="card">
+        <h2>Alertas de proceso</h2>
+        <p class="small">
+          Generadas cuando un registro de producción se sale de los rangos definidos en las recetas.
+        </p>
+        <div class="field-row-3">
+          <div>
+            <label>Fecha desde</label>
+            <input type="date" id="alDesde" />
+          </div>
+          <div>
+            <label>Fecha hasta</label>
+            <input type="date" id="alHasta" />
+          </div>
+          <div>
+            <label>Prensa (opcional)</label>
+            <input id="alPrensa" placeholder="Ej: PRENSA 7-1" />
+          </div>
+        </div>
+        <div class="field-row-3">
+          <div>
+            <label>Matriz Ref. (opcional)</label>
+            <input id="alMatriz" placeholder="Código matriz" />
+          </div>
+          <div>
+            <label>Usuario / operador (opcional)</label>
+            <input id="alUsuario" placeholder="correo o nombre" />
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <button class="btn btn-secondary" id="btnCargarAlertas">Filtrar alertas</button>
+        </div>
+
+        <div style="max-height:320px;overflow:auto;margin-top:6px;">
+          <table class="table" id="tblAlertas">
+            <thead>
+  <tr>
+    <th>Fecha</th><th>Prensa</th><th>Matriz</th>
+    <th>V.Prensa</th><th>V.Puller</th>
+    <th>Temp tocho</th><th>Temp matriz</th><th>Temp cont.</th>
+    <th>Motivo</th><th>Descripción alerta</th><th>Usuario</th><th>Fecha registro</th>
+  </tr>
+</thead>
+
+            <tbody></tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+<!-- SOLICITUDES DE RECETAS -->
+<section id="secSolicitudes" class="section">
+  <div class="card">
+    <h2>Solicitudes de nuevas recetas</h2>
+    <p class="small">
+      Propuestas enviadas por supervisores desde el ERP de prensas para revisión y aprobación del coordinador.
+    </p>
+    <div style="display:flex;gap:8px;margin-bottom:6px;">
+      <button class="btn btn-secondary" id="btnCargarSolicitudes">Actualizar</button>
+    </div>
+
+    <div style="max-height:320px;overflow:auto;margin-top:6px;">
+      <table class="table" id="tblSolicitudes">
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Prensa</th><th>Matriz</th><th>Operador</th>
+            <th>Supervisor</th><th>V.Prensa</th><th>V.Puller</th>
+            <th>Temp Tocho</th><th>Temp Matriz</th><th>Temp Cont.</th>
+            <th>Estado</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+<!-- HISTORIAL DE RECETAS -->
+<section id="secHistorial" class="section">
+  <div class="card">
+    <h2>Historial / Trazabilidad de Recetas</h2>
+    <p class="small">Registro de todas las acciones realizadas sobre cada receta (creación, edición, aprobación).</p>
+    <div style="display:flex;gap:8px;margin-bottom:6px;">
+      <input id="histMatriz" placeholder="Código matriz" style="flex:1;">
+      <button class="btn btn-secondary" id="btnVerHistorial">Ver historial</button>
+    </div>
+    <div style="max-height:320px;overflow:auto;margin-top:6px;">
+      <table class="table" id="tblHistorial">
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Acción</th><th>Usuario</th><th>Valores registrados</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+  </main>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getDatabase, ref, get, set, onValue, onChildAdded
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+/* === CONFIG FIREBASE (mismo proyecto que el ERP) === */
+const firebaseConfig = {
+  apiKey: "AIzaSyAB4UlwaVJzc4U4VbmddLf4mejKAOvTufw",
+  authDomain: "hornosapp-60887.firebaseapp.com",
+  databaseURL: "https://hornosapp-60887-default-rtdb.firebaseio.com",
+  projectId: "hornosapp-60887",
+  storageBucket: "hornosapp-60887.firebasestorage.app",
+  messagingSenderId: "853377072466",
+  appId: "1:853377072466:web:4401d39cb461a20e03ce8b",
+  measurementId: "G-BZT327Y80J"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getDatabase(app);
+const provider = new GoogleAuthProvider();
+
+// 🔔 === CONFIGURACIÓN DE NOTIFICACIONES (Firebase Cloud Messaging) ===
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js";
+
+const messaging = getMessaging(app);
+
+// 🧾 Solicita permiso al usuario para mostrar notificaciones
+Notification.requestPermission().then(async (perm) => {
+  if (perm === "granted") {
+    const token = await getToken(messaging, {
+      vapidKey: "BD4DrZ3bHRLGlXn1NEpZ12IuYoZB9JyvUzuNWfPg90F34FzVDDEfo2DZtweYvIIIp5oH95nW0Izwl4hPewovImo" // 🔹 reemplázala por tu clave de Firebase Cloud Messaging
+    });
+    console.log("Token FCM:", token);
+
+    // Guarda token del usuario en Firebase para enviarle notificaciones
+    if (auth.currentUser) {
+      const email = auth.currentUser.email.replace(/\./g, ",");
+      await set(ref(db, `erp_prensas/fcm_tokens/${email}`), token);
+    }
+  } else {
+    console.warn("Permiso de notificación denegado por el usuario.");
+  }
+});
+
+// 🔔 Cuando la app está abierta (foreground)
+onMessage(messaging, (payload) => {
+  console.log("Mensaje recibido:", payload);
+  const { title, body } = payload.notification;
+  const noti = new Notification(title, {
+    body,
+    icon: "/icon-192.png",
+    vibrate: [200, 100, 200]
+  });
+
+  // Sonido local si la app está abierta
+  const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+  beep.play().catch(() => {});
+});
+
+
+const emailKey = (email)=> email.replace(/\./g,",");
+const matrizKey = (m)=> String(m||"").replace(/[.#$/\[\]]/g,"_");
+const $ = (s)=>document.querySelector(s);
+
+let chartMotivos;
+let knownAlertKeys = new Set();
+
+/* === SERVICE WORKER PWA (recetas) === */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw_recetas.js')
+  .then(() => console.log("Service Worker RECETAS registrado"))
+  .catch(console.error);
+}
+
+/* === AUTH === */
+onAuthStateChanged(auth, async(user)=>{
+  if(!user){
+    try{ await signInWithPopup(auth, provider); }
+    catch(e){ alert("Error de login: "+e.message); }
+    return;
+  }
+  $("#lblUser").textContent = user.email;
+  const rol = await getUserRole(user.email);
+  $("#lblRol").textContent = rol;
+
+  if(!["coordinador","jefe","admin"].includes(rol)){
+    alert("No tienes permisos para módulo de Recetas/KPIs. Solo coordinadores y jefes.");
+    window.location.href = "ERP_PRENSAS_ALUTIONS.html";
+    return;
+  }
+
+  initRecetas();
+  initAlertToast();
+});
+
+$("#btnLogout").addEventListener("click",()=> signOut(auth));
+
+async function getUserRole(email){
+  // tu usuario como coordinador por defecto
+  if(email === "gary.maldonado@tecnoglass.com") return "coordinador";
+  const snap = await get(ref(db,"erp_prensas/roles_by_email/" + emailKey(email)));
+  if(!snap.exists()) return "operador";
+  return snap.val().rol || "operador";
+}
+
+/* === NAVEGACIÓN === */
+const navButtons = document.querySelectorAll(".nav-btn[data-section]");
+function activarSeccion(secId){
+  navButtons.forEach(b=>{
+    if(b.dataset.section === secId) b.classList.add("active");
+    else b.classList.remove("active");
+  });
+  document.querySelectorAll(".section").forEach(s=>{
+    s.classList.toggle("active", s.id === secId);
+  });
+}
+
+navButtons.forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    activarSeccion(btn.dataset.section);
+  });
+});
+
+/* === RECETAS === */
+
+function initRecetas(){
+  onValue(ref(db,"erp_prensas/recetas"),snap=>{
+    const tbody = $("#tblRecetas tbody");
+    tbody.innerHTML = "";
+    if(snap.exists()){
+      const val = snap.val();
+      Object.entries(val).forEach(([key,r])=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML = `
+  <td><button class="btn btn-outline" style="padding:3px 8px;font-size:10px;" data-m="${key}">Editar</button></td>
+  <td>${r.matrizRef||""}</td>
+  <td>${r.descripcion||""}</td>
+  <td>${r.vPrensaMin??""}</td>
+  <td>${r.vPrensaMax??""}</td>
+  <td>${r.vPullerMin??""}</td>
+  <td>${r.vPullerMax??""}</td>
+  <td>${r.tempMin??""}</td>
+  <td>${r.tempMax??""}</td>
+  <td>${r.tempMatrizMin??""}</td>
+  <td>${r.tempMatrizMax??""}</td>
+  <td>${r.tempContMin??""}</td>
+  <td>${r.tempContMax??""}</td>
+  <td>${r.updatedBy||r.createdBy||""}</td>
+`;
+
+        tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll("button[data-m]").forEach(btn=>{
+        btn.addEventListener("click",()=>{
+          const k = btn.dataset.m;
+          const r = snap.val()[k];
+          cargarRecetaEnFormulario(r);
+        });
+      });
+    }
+  });
+}
+
+function cargarRecetaEnFormulario(r){
+  $("#rcMatriz").value = r.matrizRef||"";
+  $("#rcDesc").value   = r.descripcion||"";
+  $("#rcComentario").value = r.comentario||"";
+  $("#rcVPmin").value  = r.vPrensaMin??"";
+  $("#rcVPmax").value  = r.vPrensaMax??"";
+  $("#rcVUmin").value  = r.vPullerMin??"";
+  $("#rcVUmax").value  = r.vPullerMax??"";
+  $("#rcTmin").value   = r.tempMin??"";
+  $("#rcTmax").value   = r.tempMax??"";
+  $("#rcTMatrizMin").value = r.tempMatrizMin ?? "";
+  $("#rcTMatrizMax").value = r.tempMatrizMax ?? "";
+  $("#rcTContMin").value   = r.tempContMin ?? "";
+  $("#rcTContMax").value   = r.tempContMax ?? "";
+
+}
+
+$("#btnLimpiarReceta").addEventListener("click",()=>{
+  [
+  "rcMatriz","rcDesc","rcComentario",
+  "rcVPmin","rcVPmax","rcVUmin","rcVUmax",
+  "rcTmin","rcTmax",
+  "rcTMatrizMin","rcTMatrizMax",
+  "rcTContMin","rcTContMax"
+]
+
+    .forEach(id=> document.getElementById(id).value="");
+});
+
+$("#btnGuardarReceta").addEventListener("click", async()=>{
+  const user = auth.currentUser;
+  if(!user){alert("Sin sesión.");return;}
+
+  const matriz = $("#rcMatriz").value.trim();
+  if(!matriz){alert("Indica una matriz.");return;}
+
+  const recetaRef = ref(db, "erp_prensas/recetas/" + matrizKey(matriz));
+  const snapAnterior = await get(recetaRef);
+  const anterior = snapAnterior.exists() ? snapAnterior.val() : {};
+
+  const data = {
+    matrizRef: matriz,
+    descripcion: $("#rcDesc").value.trim(),
+    comentario: $("#rcComentario").value.trim(),
+    vPrensaMin: numOrNull($("#rcVPmin").value),
+    vPrensaMax: numOrNull($("#rcVPmax").value),
+    vPullerMin: numOrNull($("#rcVUmin").value),
+    vPullerMax: numOrNull($("#rcVUmax").value),
+    tempMin: numOrNull($("#rcTmin").value),
+    tempMax: numOrNull($("#rcTmax").value),
+    tempMatrizMin: numOrNull($("#rcTMatrizMin").value),
+    tempMatrizMax: numOrNull($("#rcTMatrizMax").value),
+    tempContMin: numOrNull($("#rcTContMin").value),
+    tempContMax: numOrNull($("#rcTContMax").value),
+    updatedBy: user.email,
+    updatedAt: new Date().toISOString()
+  };
+
+  await set(recetaRef, data);
+  alert("Receta guardada/actualizada.");
+
+  // 🔹 Detectar diferencias entre la versión anterior y la nueva
+  const diferencias = {};
+  for (const key in data) {
+    const antes = anterior[key];
+    const ahora = data[key];
+    if (JSON.stringify(antes) !== JSON.stringify(ahora)) {
+      diferencias[key] = { antes: antes ?? "-", ahora: ahora ?? "-" };
+    }
+  }
+
+  // 🔹 Registrar trazabilidad
+  const logKey = Date.now();
+  const logRef = ref(db, `erp_prensas/recetas_log/${matrizKey(matriz)}/${logKey}`);
+  await set(logRef, {
+    accion: snapAnterior.exists() ? "actualizacion_manual" : "creacion",
+    realizadoPor: user.email,
+    fecha: new Date().toISOString(),
+    cambios: Object.keys(diferencias).length > 0 ? diferencias : "(sin cambios)",
+    datos: data
+  });
+});
+
+const numOrNull = (v)=> v==="" ? null : Number(v);
+
+/* === UTILIDADES FECHAS === */
+function hoyISO(){return new Date().toISOString().slice(0,10);}
+function rangoFechas(desde,hasta){
+  const res=[];let d=new Date(desde);const h=new Date(hasta);
+  while(d<=h){res.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1);}
+  return res;
+}
+
+/* === KPIs: Motivos vs matrices === */
+
+$("#kpiDesde").value = hoyISO();
+$("#kpiHasta").value = hoyISO();
+$("#btnCargarKPIs").addEventListener("click", cargarKPIs);
+
+async function cargarKPIs(){
+  const desde = $("#kpiDesde").value;
+  const hasta = $("#kpiHasta").value;
+  if(!desde || !hasta){alert("Selecciona rango de fechas.");return;}
+
+  const fechas = rangoFechas(desde,hasta);
+  const conteo = new Map();
+
+  for(const f of fechas){
+    const snap = await get(ref(db,"erp_prensas/reportes/" + f));
+    if(!snap.exists()) continue;
+    Object.values(snap.val()).forEach(r=>{
+      const clave = `${r.matrizRef||"-"} – ${r.motivoDesc||r.motivoCod||"Sin motivo"}`;
+      conteo.set(clave,(conteo.get(clave)||0)+1);
+    });
+  }
+
+  const labels = [...conteo.keys()];
+  const data   = [...conteo.values()];
+
+  if(chartMotivos) chartMotivos.destroy();
+  const ctx = document.getElementById("chartMotivos");
+  chartMotivos = new Chart(ctx,{
+    type:"bar",
+    data:{labels,datasets:[{label:"Registros",data}]},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{autoSkip:false,maxRotation:60,minRotation:40}}}
+    }
+  });
+}
+
+/* === ALERTAS: tabla + filtro (universal) === */
+$("#alDesde").value = hoyISO();
+$("#alHasta").value = hoyISO();
+$("#btnCargarAlertas").addEventListener("click", cargarAlertas);
+
+async function cargarAlertas() {
+  const desde = $("#alDesde").value;
+  const hasta = $("#alHasta").value;
+  const prensaFiltro = $("#alPrensa").value.trim().toLowerCase();
+  const matrizFiltro = $("#alMatriz").value.trim().toLowerCase();
+  const usuarioFiltro = $("#alUsuario").value.trim().toLowerCase();
+  const tbody = $("#tblAlertas tbody");
+  tbody.innerHTML = "";
+
+  try {
+    const snap = await get(ref(db, "erp_prensas/alertas"));
+    if (!snap.exists()) {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#999;">Sin alertas registradas</td></tr>`;
+      return;
+    }
+
+    const listaAlertas = [];
+    const datos = snap.val();
+
+    // 🔹 Recorrer todas las claves y subniveles
+    const recorrer = (obj) => {
+      for (const key in obj) {
+        const val = obj[key];
+        if (val && typeof val === "object") {
+          if (val.descripcion && (val.matrizRef || val.prensa)) {
+            listaAlertas.push(val);
+          } else {
+            recorrer(val);
+          }
+        }
+      }
+    };
+    recorrer(datos);
+
+    if (listaAlertas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#888;">No hay alertas guardadas</td></tr>`;
+      return;
+    }
+
+    const desdeD = new Date(desde + "T00:00:00");
+    const hastaD = new Date(hasta + "T23:59:59");
+
+    const filtradas = listaAlertas.filter(a => {
+      const f = new Date(a.fecha || a.createdAt || "");
+      if (isNaN(f)) return false;
+      if (f < desdeD || f > hastaD) return false;
+
+      if (prensaFiltro && !String(a.prensa || "").toLowerCase().includes(prensaFiltro)) return false;
+      if (matrizFiltro && !String(a.matrizRef || "").toLowerCase().includes(matrizFiltro)) return false;
+      const usuarioTxt = (a.createdBy || "") + " " + (a.operador || "");
+      if (usuarioFiltro && !usuarioTxt.toLowerCase().includes(usuarioFiltro)) return false;
+      return true;
+    });
+
+    if (filtradas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#999;">No se encontraron alertas en el rango o filtros</td></tr>`;
+      return;
+    }
+
+    filtradas.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    filtradas.forEach(a => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+  <td>${a.fecha || ""}</td>
+  <td>${a.prensa || ""}</td>
+  <td>${a.matrizRef || ""}</td>
+  <td>${a.vPrensa ?? ""}</td>
+  <td>${a.vPuller ?? ""}</td>
+  <td>${a.temp ?? ""}</td>
+  <td>${a.tempMatriz ?? ""}</td>
+  <td>${a.tempCont ?? ""}</td>
+  <td>${a.motivoDesc || a.motivoCod || ""}</td>
+  <td>${a.descripcion || ""}</td>
+  <td>${a.createdBy || ""}</td>
+  <td>${a.createdAt ? a.createdAt.replace("T"," ").slice(0,19) : ""}</td>
+`;
+
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error("Error cargando alertas:", err);
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#ff6b6b;">Error al cargar alertas</td></tr>`;
+  }
+}
+
+/* === SOLICITUDES DE RECETAS === */
+$("#btnCargarSolicitudes").addEventListener("click", cargarSolicitudesRecetas);
+
+async function cargarSolicitudesRecetas(){
+  const tbody = $("#tblSolicitudes tbody");
+  tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:#999;">Cargando...</td></tr>`;
+
+  try{
+    const snap = await get(ref(db, "erp_prensas/solicitudes_recetas"));
+    if(!snap.exists()){
+      tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:#999;">Sin solicitudes pendientes</td></tr>`;
+      return;
+    }
+
+    const datos = Object.entries(snap.val())
+      .map(([k,v])=>({...v,key:k}))
+      .sort((a,b)=> new Date(b.creadoEn) - new Date(a.creadoEn));
+
+    tbody.innerHTML = "";
+    datos.forEach(s=>{
+      const colorEstado = s.estado==="aprobado" ? "#16c784" :
+                          s.estado==="rechazado" ? "#ff4b6a" : "#ffae00";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${s.fecha||""}</td>
+        <td>${s.prensa||""}</td>
+        <td>${s.matrizRef||""}</td>
+        <td>${s.operador||""}</td>
+        <td>${s.supervisor||""}</td>
+        <td>${s.parametros?.vPrensa??""}</td>
+        <td>${s.parametros?.vPuller??""}</td>
+        <td>${s.parametros?.tempTocho??""}</td>
+        <td>${s.parametros?.tempMatriz??""}</td>
+        <td>${s.parametros?.tempContenedor??""}</td>
+        <td style="color:${colorEstado};font-weight:600;">${s.estado||"pendiente"}</td>
+        <td>
+          ${s.estado==="pendiente" ? `
+            <button class="btn btn-primary btn-mini" data-aprobar="${s.key}">Aprobar</button>
+            <button class="btn btn-outline btn-mini" data-rechazar="${s.key}">Rechazar</button>
+          ` : "-"}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // Botones de aprobar / rechazar
+    tbody.querySelectorAll("[data-aprobar]").forEach(btn=>{
+      btn.addEventListener("click",()=> aprobarSolicitud(btn.dataset.aprobar));
+    });
+    tbody.querySelectorAll("[data-rechazar]").forEach(btn=>{
+      btn.addEventListener("click",()=> rechazarSolicitud(btn.dataset.rechazar));
+    });
+
+  }catch(err){
+    console.error("Error cargando solicitudes:",err);
+    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:#f66;">Error al cargar solicitudes</td></tr>`;
+  }
+}
+
+async function aprobarSolicitud(key){
+  const snap = await get(ref(db, "erp_prensas/solicitudes_recetas/"+key));
+  if(!snap.exists()) return alert("Solicitud no encontrada");
+  const s = snap.val();
+  if(!s.matrizRef) return alert("Solicitud sin matriz válida.");
+
+  // Crear o actualizar receta (todas las temperaturas y velocidades)
+  const receta = {
+    matrizRef: s.matrizRef,
+    descripcion: s.matrizRef,
+    comentario: "Receta aprobada desde solicitud",
+    vPrensaMin: s.parametros.vPrensa ?? null,
+    vPrensaMax: s.parametros.vPrensa ?? null,
+    vPullerMin: s.parametros.vPuller ?? null,
+    vPullerMax: s.parametros.vPuller ?? null,
+    tempMin: s.parametros.tempTocho ?? null,
+    tempMax: s.parametros.tempTocho ?? null,
+    tempMatrizMin: s.parametros.tempMatriz ?? null,
+    tempMatrizMax: s.parametros.tempMatriz ?? null,
+    tempContMin: s.parametros.tempContenedor ?? null,
+    tempContMax: s.parametros.tempContenedor ?? null,
+    updatedBy: auth.currentUser?.email || "sistema",
+    updatedAt: new Date().toISOString()
+  };
+
+  await set(ref(db, "erp_prensas/recetas/" + matrizKey(s.matrizRef)), receta);
+  await set(ref(db, "erp_prensas/solicitudes_recetas/" + key + "/estado"), "aprobado");
+
+  // 🔹 Guardar log de aprobación
+  const logKey = Date.now();
+  const logRef = ref(db, `erp_prensas/recetas_log/${matrizKey(s.matrizRef)}/${logKey}`);
+  await set(logRef, {
+    accion: "aprobacion_solicitud",
+    realizadoPor: auth.currentUser?.email || "sistema",
+    fecha: new Date().toISOString(),
+    datos: receta,
+    origenSolicitud: key
+  });
+
+
+  alert(`Receta para matriz ${s.matrizRef} creada exitosamente ✅`);
+  cargarSolicitudesRecetas();
+}
+
+async function rechazarSolicitud(key){
+  await set(ref(db,"erp_prensas/solicitudes_recetas/"+key+"/estado"),"rechazado");
+  alert("Solicitud rechazada ❌");
+  cargarSolicitudesRecetas();
+}
+
+/* === HISTORIAL DE RECETAS === */
+$("#btnVerHistorial").addEventListener("click", async()=>{
+  const matriz = $("#histMatriz").value.trim();
+  const tbody = $("#tblHistorial tbody");
+  tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Cargando...</td></tr>`;
+  if(!matriz){ alert("Ingresa un código de matriz."); return; }
+
+  try{
+    const snap = await get(ref(db, "erp_prensas/recetas_log/" + matrizKey(matriz)));
+    if(!snap.exists()){
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Sin historial registrado</td></tr>`;
+      return;
+    }
+    const datos = Object.values(snap.val()).sort((a,b)=> new Date(b.fecha)-new Date(a.fecha));
+    tbody.innerHTML = "";
+    datos.forEach(l=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML = `
+        <td>${l.fecha ? l.fecha.replace("T"," ").slice(0,19) : ""}</td>
+        <td>${l.accion}</td>
+        <td>${l.realizadoPor}</td>
+        <td>
+  ${l.cambios && typeof l.cambios === "object"
+    ? Object.entries(l.cambios).map(([campo, vals]) => 
+        `<div style="margin-bottom:3px;">
+          <b>${campo}</b>: <span style="color:#ffae00;">${vals.antes}</span> → 
+          <span style="color:#00e5ff;">${vals.ahora}</span>
+        </div>`
+      ).join("")
+    : `<span style="color:#666;">${l.cambios || "(sin cambios detectados)"}</span>`}
+</td>
+
+      `;
+      tbody.appendChild(tr);
+    });
+  }catch(err){
+    console.error("Error cargando historial:",err);
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#f66;">Error al cargar historial</td></tr>`;
+  }
+});
+
+
+/* === ESCUCHAR NUEVAS SOLICITUDES EN TIEMPO REAL === */
+const sound = $("#alertSound");
+
+onChildAdded(ref(db, "erp_prensas/solicitudes_recetas"), snapshot => {
+  const data = snapshot.val();
+  if (!data) return;
+
+  // Solo notificar si la solicitud está pendiente
+  if (data.estado && data.estado !== "pendiente") return;
+
+  // Mostrar notificación visual
+  mostrarNotificacionReceta(data);
+
+  // Reproducir sonido de alerta
+  try { sound.play(); } catch(e) { console.warn("Sonido bloqueado por navegador"); }
+});
+
+function mostrarNotificacionReceta(data){
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `
+    <div class="toast-title">📨 Nueva propuesta de receta</div>
+    <div class="toast-body">
+      <b>Matriz:</b> ${data.matrizRef || "N/A"}<br>
+      <b>Prensa:</b> ${data.prensa || "?"} — <b>Supervisor:</b> ${data.supervisor || "?"}
+    </div>
+    <div class="toast-actions">
+      <button class="btn-mini btn-primary">Revisar</button>
+      <button class="btn-mini btn-outline">Cerrar</button>
+    </div>
+  `;
+  $("#toastContainer").appendChild(toast);
+
+  toast.style.animation = "slideIn 0.3s ease-out";
+
+  toast.querySelector(".btn-primary").addEventListener("click", () => {
+    activarSeccion("secSolicitudes");
+    cargarSolicitudesRecetas();
+    toast.remove();
+  });
+
+  toast.querySelector(".btn-outline").addEventListener("click", () => toast.remove());
+
+  setTimeout(() => toast.remove(), 15000);
+}
+
+
+/* === BANNERS FLOTANTES DE ALERTA (tiempo real) === */
+async function initAlertToast(){
+  const alertRef = ref(db,"erp_prensas/alertas");
+
+  // cargar existentes para no disparar toast hacia atrás
+  const snap = await get(alertRef);
+  if(snap.exists()){
+    Object.keys(snap.val()).forEach(k=> knownAlertKeys.add(k));
+  }
+
+  onChildAdded(alertRef, (csnap)=>{
+    const key = csnap.key;
+    if(knownAlertKeys.has(key)) return; // ya estaba
+    knownAlertKeys.add(key);
+    const a = csnap.val();
+    const mensaje = `Prensa ${a.prensa||"-"} · Matriz ${a.matrizRef||"-"} – ${a.descripcion||"Alerta fuera de receta"}`;
+    showToast("Nueva alerta de proceso", mensaje, a);
+  });
+}
+
+function showToast(titulo, cuerpo, alerta){
+  const cont = document.getElementById("toastContainer");
+  const div = document.createElement("div");
+  div.className = "toast";
+  div.innerHTML = `
+    <button class="toast-close">×</button>
+    <div class="toast-title">${titulo}</div>
+    <div class="toast-body">${cuerpo}</div>
+    <div class="toast-actions">
+      <button type="button" class="toast-view">Ver alerta</button>
+    </div>
+  `;
+  cont.appendChild(div);
+
+  div.querySelector(".toast-close").addEventListener("click",()=>div.remove());
+
+  if(alerta){
+    div.querySelector(".toast-view").addEventListener("click",()=>{
+      // Ir a sección de alertas filtrada por esa matriz/fecha
+      activarSeccion("secAlertas");
+      if(alerta.fecha){
+        $("#alDesde").value = alerta.fecha;
+        $("#alHasta").value = alerta.fecha;
+      }
+      if(alerta.prensa) $("#alPrensa").value = alerta.prensa;
+      if(alerta.matrizRef) $("#alMatriz").value = alerta.matrizRef;
+      cargarAlertas();
+      div.remove();
+    });
+  }
+
+  setTimeout(()=>{div.remove();}, 8000);
+}
+
+
+
+</script>
+
+<!-- 🔔 Sonido de alerta para nuevas solicitudes -->
+<audio id="alertSound" 
+       src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" 
+       preload="auto"></audio>
+</body>
+</html>
