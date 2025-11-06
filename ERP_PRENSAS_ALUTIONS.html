@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>ERP PRENSAS – ALUTIONS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- Fuente Poppins -->
+<link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+
+<!-- Librería para generar Excel .xlsx -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+:root{
+  --bg:#05070b;
+  --bg2:#0d1017;
+  --panel:#121722;
+  --border:#242b3b;
+  --accent:#25c6ff;
+  --accent-soft:#25c6ff22;
+  --accent-strong:#40e0ff;
+  --text:#f2f5ff;
+  --muted:#b6c2ff;
+  --danger:#ff4b6a;
+}
+
+/* Tema alterno (para alternar fondo) */
+:root[data-theme="alt"]{
+  --bg:#02070f;
+  --bg2:#050915;
+  --panel:#0d1224;
+  --border:#323b5c;
+  --accent:#ff6bd5;
+  --accent-soft:#ff6bd522;
+  --accent-strong:#ffa6ff;
+  --text:#f9f4ff;
+  --muted:#c3b8ff;
+  --danger:#ff4b6a;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:"Poppins",system-ui,sans-serif;
+}
+body{
+  background:radial-gradient(circle at top,#151c33 0,var(--bg) 55%);
+  color:var(--text);
+  min-height:100vh;
+}
+button{cursor:pointer}
+input,select,textarea{
+  width:100%;
+  padding:6px 9px;
+  border-radius:6px;
+  border:1px solid #31384d;
+  background:#05070b;
+  color:var(--text);
+  font-size:13px;
+  outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+label{
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:2px;
+  display:block;
+}
+h1,h2,h3{font-weight:500;}
+
+.app-shell{
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+.topbar{
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:6px 14px;
+  background:linear-gradient(90deg,#05070b,#101828);
+  border-bottom:1px solid #252b3a;
+  box-shadow:0 4px 10px #0006;
+}
+.app-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:15px;
+}
+.app-title span.dot{
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:#13d68f;
+  box-shadow:0 0 10px #13d68f;
+}
+.app-title strong{
+  color:var(--accent-strong);
+  font-weight:600;
+}
+.topbar-right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:11px;
+  color:var(--muted);
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.pill{
+  padding:4px 10px;
+  border-radius:999px;
+  background:#060915;
+  border:1px solid #252b3f;
+  font-size:11px;
+}
+.logout-btn{
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #30384f;
+  background:#05070b;
+  color:var(--muted);
+  font-size:11px;
+  cursor:pointer;
+}
+.logout-btn:hover{background:#161b28;}
+
+.icon-btn{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  border:1px solid #344055;
+  background:#05070b;
+  color:var(--accent-strong);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:15px;
+  padding:0;
+}
+.icon-btn:hover{
+  background:#151b2c;
+}
+
+/* Layout principal */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  padding:10px;
+}
+.form-panel{
+  flex:1;
+  background:var(--bg2);
+  border-radius:12px;
+  border:1px solid var(--border);
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  width:100%;
+}
+.section-title{
+  font-size:13px;
+  margin-bottom:2px;
+  color:var(--accent-strong);
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.form-grid{
+  flex:1;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:10px;
+}
+.card{
+  background:var(--panel);
+  border-radius:10px;
+  border:1px solid #222a3a;
+  padding:10px;
+  box-shadow:0 6px 14px #0007;
+}
+.card-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:6px;
+}
+.card-head h3{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--muted);
+}
+.field-row{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:6px;
+}
+.field-row-3{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:6px;
+}
+.col-span-3{grid-column:1/-1;}
+.col-span-2{grid-column:span 2;}
+.small{font-size:11px;color:#93a4e0;}
+
+.main-actions{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:4px;
+  flex-wrap:wrap;
+}
+.btn{
+  border-radius:999px;
+  border:none;
+  padding:8px 16px;
+  font-size:12px;
+  font-weight:500;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent-strong));
+  color:#000b14;
+}
+.btn-secondary{
+  background:#141b24;
+  color:var(--text);
+  border:1px solid #2f3b5a;
+}
+.btn-outline{
+  background:transparent;
+  border:1px solid #4a5678;
+  color:var(--muted);
+}
+
+/* Modal (reporte) */
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:#000c;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+}
+.modal-backdrop.show{display:flex;}
+.modal{
+  width:90vw;
+  max-width:1400px;
+  max-height:94vh;
+  background:#05070b;
+  border-radius:12px;
+  border:1px solid #2c3550;
+  display:flex;
+  flex-direction:column;
+}
+.modal-header{
+  padding:10px 14px;
+  border-bottom:1px solid #262f44;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:13px;
+}
+.modal-header strong{
+  color:var(--accent-strong);
+  text-shadow:0 0 8px var(--accent-soft);
+}
+.modal-body{
+  padding:8px 10px;
+  overflow:auto;
+  font-size:11px;
+}
+.modal-footer{
+  padding:8px 10px;
+  border-top:1px solid #262f44;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:11px;
+}
+.table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:11px;
+}
+.table th,.table td{
+  border-bottom:1px solid #222a3c;
+  padding:4px 6px;
+  white-space:normal;
+  text-align:center;
+}
+.table th{
+  position:sticky;
+  top:0;
+  background:#07101f;
+  z-index:1;
+  color:#f2f6ff;
+}
+.table tr:hover{background:#121829;}
+.table .mini-btn{
+  padding:3px 8px;
+  border-radius:999px;
+  border:1px solid #2e3955;
+  background:#0c101c;
+  color:var(--accent-strong);
+  font-size:10px;
+}
+
+.search-box{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  margin-bottom:6px;
+  flex-wrap:wrap;
+}
+.search-box input,
+.search-box select{
+  height:26px;
+  font-size:11px;
+  padding:4px 8px;
+  max-width:180px;
+}
+.search-box span{
+  font-size:11px;
+  color:var(--muted);
+}
+
+/* Login overlay */
+.login-overlay{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#020309f5;
+  z-index:60;
+}
+.login-card{
+  width:360px;
+  border-radius:14px;
+  border:1px solid #232a3d;
+  background:#05070b;
+  padding:18px;
+  box-shadow:0 18px 55px #000;
+}
+.login-card h2{
+  font-size:18px;
+  margin-bottom:6px;
+  color:var(--accent-strong);
+}
+.login-card p{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:12px;
+}
+.login-card .btn-login{
+  width:100%;
+  justify-content:center;
+  background:#18253b;
+  border:1px solid #2c3a55;
+  color:var(--text);
+}
+.login-foot{
+  font-size:11px;
+  color:#6f7a95;
+  margin-top:10px;
+}
+.login-foot strong{color:var(--accent-strong);}
+
+/* Scrollbar */
+::-webkit-scrollbar{height:6px;width:6px;}
+::-webkit-scrollbar-track{background:#05070b;}
+::-webkit-scrollbar-thumb{background:#333d55;border-radius:999px;}
+
+@media (max-width:900px){
+  .topbar{
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .topbar-right{
+    justify-content:flex-end;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <div class="topbar">
+    <div class="app-title">
+      <span class="dot"></span>
+      <div>
+        <div style="font-size:12px;">PRENSAS</div>
+        <strong>ALUTIONS – Registro</strong>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="pill" id="lblFechaTurno">Fecha – Turno</div>
+      <div class="pill" id="lblPrensaCtx">Prensa: -</div>
+      <div class="pill" id="lblUserEmail">-</div>
+      <button class="icon-btn" id="btnTheme" title="Cambiar tema">🌓</button>
+      <button class="logout-btn" id="btnLogout">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- PANEL FORMULARIO -->
+    <div class="form-panel">
+      <div class="section-title">Registro de producción</div>
+      <div class="form-grid">
+
+        <!-- Operación -->
+        <div class="card col-span-3">
+          <div class="card-head">
+            <h3>Operación</h3>
+            <span class="pill" id="lblHoy" style="font-size:11px;padding:3px 8px;">Hoy</span>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Operador</label>
+              <input id="inpOperador" placeholder="Nombre operador / correo" />
+            </div>
+            <div>
+              <label>Supervisor</label>
+              <input id="inpSupervisor" placeholder="Supervisor" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Prensa</label>
+              <select id="selPrensa"></select>
+            </div>
+            <div>
+              <label>Turno</label>
+              <select id="selTurno">
+                <option value="T1">T1</option>
+                <option value="T2">T2</option>
+                <option value="T3">T3</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Fecha producción</label>
+              <input type="date" id="inpFecha" />
+            </div>
+            <div class="col-span-2">
+              <label>Cliente</label>
+              <input id="inpCliente" placeholder="Cliente" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Orden & Matriz -->
+        <div class="card">
+          <div class="card-head"><h3>Orden & Matriz</h3></div>
+          <div class="field-row">
+            <div>
+              <label>SO-ITEM</label>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <input id="inpSOItem" placeholder="Ej: 12345-07" style="flex:1;" />
+                <button id="btnBuscarAPI"
+                  style="background:#0e1726;color:var(--accent);
+                  border:1px solid var(--accent);border-radius:6px;
+                  padding:4px 8px;cursor:pointer;">🔍</button>
+              </div>
+            </div>
+            <div>
+              <label>Copia No.</label>
+              <input id="inpCopiaNo" type="number" min="0" step="1" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Matriz Ref.</label>
+              <input id="inpMatriz" placeholder="Código matriz" />
+            </div>
+            <div>
+              <label>Peso bruto (kg)</label>
+              <input id="inpPesoBruto" type="number" min="0" step="0.01" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Tiempos & Velocidades -->
+        <div class="card">
+          <div class="card-head"><h3>Tiempos & Velocidades</h3></div>
+          <div class="field-row">
+            <div>
+              <label>Hora inicial</label>
+              <input type="time" id="inpHIni" />
+            </div>
+            <div>
+              <label>Hora final</label>
+              <input type="time" id="inpHFin" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>V. prensa (mm/s)</label>
+              <input type="number" id="inpVPrensa" step="0.01" />
+            </div>
+            <div>
+              <label>V. puller (mm/s)</label>
+              <input type="number" id="inpVPuller" step="0.01" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Presiones -->
+        <div class="card">
+          <div class="card-head"><h3>Presiones</h3></div>
+          <div class="field-row-3">
+            <div>
+              <label>Rompimiento (bar)</label>
+              <input type="number" id="inpPRomp" step="0.1" />
+            </div>
+            <div>
+              <label>Trabajo (bar)</label>
+              <input type="number" id="inpPTrab" step="0.1" />
+            </div>
+            <div>
+              <label>Sellado (bar)</label>
+              <input type="number" id="inpPSell" step="0.1" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Tochos -->
+        <div class="card col-span-2">
+          <div class="card-head"><h3>Tochos</h3></div>
+          <div class="field-row-3">
+            <div>
+              <label>Aleación</label>
+              <input id="inpAleacion" placeholder="Ej: 6005" />
+            </div>
+            <div>
+              <label>Tipo</label>
+              <input id="inpTipoTocho" placeholder="Tipo" />
+            </div>
+            <div>
+              <label>Longitud (mm)</label>
+              <input type="number" id="inpLongTocho" />
+            </div>
+          </div>
+          <div class="field-row-3">
+            <div>
+              <label>Colada</label>
+              <input id="inpColada" />
+            </div>
+            <div>
+              <label>Temp. Matriz (°C)</label>
+              <input type="number" id="inpTempMatriz" />
+            </div>
+            <div>
+              <label>Temp. Contenedor (°C)</label>
+              <input type="number" id="inpTempContenedor" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Temp. Tocho (°C)</label>
+              <input type="number" id="inpTemp" />
+            </div>
+            <div>
+              <label>Cant. tochos</label>
+              <input type="number" id="inpCant" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Motivo parada -->
+        <div class="card col-span-3">
+          <div class="card-head">
+            <h3>Motivo de parada (opcional)</h3>
+          </div>
+          <div class="field-row">
+            <div>
+              <label>Código – Motivo</label>
+              <select id="selMotivo"></select>
+            </div>
+            <div>
+              <label>Observaciones</label>
+              <input id="inpObs" placeholder="Comentario breve" />
+            </div>
+          </div>
+          <div class="small">Si no hubo parada, deja el motivo en “Sin motivo”.</div>
+        </div>
+
+      </div>
+
+      <div class="main-actions">
+        <div>
+          <button class="btn btn-secondary" id="btnVerRegistros">Ver reporte de prensa</button>
+        </div>
+        <div>
+          <button class="btn btn-outline" id="btnLimpiar">Nuevo registro</button>
+          <button class="btn btn-primary" id="btnGuardar">Guardar registro</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL REPORTE DE PRENSA -->
+<div class="modal-backdrop" id="modalRegistros">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <strong>Reporte de prensa</strong>
+        <span id="lblFechaModal" style="font-size:11px;margin-left:6px;color:var(--muted);"></span>
+      </div>
+      <button class="logout-btn" id="btnCerrarModal">Cerrar</button>
+    </div>
+    <div class="modal-body">
+      <div class="search-box">
+        <span>Fecha:</span><input type="date" id="filtroFecha" />
+        <span>Turno:</span>
+        <select id="filtroTurno" style="min-width:80px;">
+          <option value="">Todos</option>
+          <option value="T1">T1</option>
+          <option value="T2">T2</option>
+          <option value="T3">T3</option>
+        </select>
+        <span>Prensa:</span><select id="filtroPrensa" style="min-width:120px;"></select>
+        <span>Matriz:</span><input id="filtroMatriz" placeholder="Ref. matriz" />
+        <span>Operador:</span><input id="filtroOperador" placeholder="Nombre" />
+        <button class="btn btn-secondary" id="btnAplicarFiltros">Aplicar filtros</button>
+        <button class="btn btn-outline" id="btnDescargarCsvModal">Descargar Excel</button>
+      </div>
+      <div style="overflow:auto;">
+        <table class="table" id="tblRegistros">
+          <thead>
+            <tr>
+              <th>Editar</th>
+              <th>Receta</th>
+              <th>Fecha</th>
+              <th>Hora ini</th>
+              <th>Hora fin</th>
+              <th>Operador</th>
+              <th>Supervisor</th>
+              <th>Prensa</th>
+              <th>SO-ITEM</th>
+              <th>Cliente</th>
+              <th>Matriz</th>
+              <th>Copia</th>
+              <th>V.Prensa</th>
+              <th>V.Puller</th>
+              <th>Romp.</th>
+              <th>Trab.</th>
+              <th>Sell.</th>
+              <th>Aleación</th>
+              <th>Tipo</th>
+              <th>Long.</th>
+              <th>Colada</th>
+              <th>Temp Tocho</th>
+              <th>Temp Matriz</th>
+              <th>Temp Cont.</th>
+              <th>Cant.</th>
+              <th>Peso</th>
+              <th>Motivo</th>
+              <th>Obs</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div>Haz clic en <strong>Editar</strong> para cargar el registro en el formulario.</div>
+      <div id="lblTotalReg" style="font-weight:500;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <h2>ERP PRENSAS – ALUTIONS</h2>
+    <p>Inicia sesión con tu correo corporativo para registrar producción y tiempos de parada.</p>
+    <button class="btn btn-login" id="btnLoginGoogle">Iniciar sesión con Google</button>
+    <div class="login-foot">
+      Las <strong>recetas y KPIs</strong> solo son visibles para coordinadores y jefes en el módulo dedicado.
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getDatabase, ref, child, get, set, push, update
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+
+/* === CONFIGURACIÓN FIREBASE === */
+const firebaseConfig = {
+  apiKey: "AIzaSyAB4UlwaVJzc4U4VbmddLf4mejKAOvTufw",
+  authDomain: "hornosapp-60887.firebaseapp.com",
+  databaseURL: "https://hornosapp-60887-default-rtdb.firebaseio.com",
+  projectId: "hornosapp-60887",
+  storageBucket: "hornosapp-60887.firebasestorage.app",
+  messagingSenderId: "853377072466",
+  appId: "1:853377072466:web:4401d39cb461a20e03ce8b",
+  measurementId: "G-BZT327Y80J"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getDatabase(app);
+const provider = new GoogleAuthProvider();
+
+/* === UTILIDADES === */
+const $ = (sel)=>document.querySelector(sel);
+const modalRegistros = $("#modalRegistros");
+let registrosCache = [];   // registros cargados en el modal
+let editInfo = null;       // {fechaKey, id}
+let motivosCache = [];     // motivos de parada para Excel
+
+const emailKey  = (email)=> email.replace(/\./g, ",");
+const matrizKey = (m)=> String(m||"").replace(/[.#$/\[\]]/g,"_");
+
+/* Tema */
+const THEME_KEY = "erp_prensas_theme";
+function applyTheme(theme){
+  document.documentElement.setAttribute("data-theme", theme);
+}
+(function initTheme(){
+  const saved = localStorage.getItem(THEME_KEY) || "default";
+  applyTheme(saved);
+})();
+$("#btnTheme").addEventListener("click", ()=>{
+  const current = document.documentElement.getAttribute("data-theme") || "default";
+  const next = current === "default" ? "alt" : "default";
+  applyTheme(next);
+  localStorage.setItem(THEME_KEY, next);
+});
+
+function turnoAuto(){
+  const h = new Date().getHours();
+  if(h>=6 && h<14) return "T1";
+  if(h>=14 && h<22) return "T2";
+  return "T3";
+}
+function hoyISO(){return new Date().toISOString().slice(0,10);}
+
+function actualizarEtiquetaFechaTurno(){
+  const f = $("#inpFecha").value || hoyISO();
+  const t = $("#selTurno").value || turnoAuto();
+  $("#lblFechaTurno").textContent = `Fecha: ${f} · Turno: ${t}`;
+}
+
+/* === AUTH === */
+$("#btnLoginGoogle").addEventListener("click", async()=>{
+  try{ await signInWithPopup(auth, provider); }
+  catch(err){ alert("Error iniciando sesión: " + err.message); }
+});
+$("#btnLogout").addEventListener("click", ()=> signOut(auth));
+
+async function getUserRole(email){
+  if(email === "garymaldonado1411@gmail.com") return "coordinador";
+  const snap = await get(ref(db,"erp_prensas/roles_by_email/" + emailKey(email)));
+  if(!snap.exists()) return "operador";
+  return snap.val().rol || "operador";
+}
+
+onAuthStateChanged(auth, async(user)=>{
+  if(!user){
+    $("#loginOverlay").style.display="flex";
+    return;
+  }
+  $("#loginOverlay").style.display="none";
+  $("#lblUserEmail").textContent = user.email;
+  $("#inpFecha").value = hoyISO();
+  $("#selTurno").value = turnoAuto();
+  actualizarEtiquetaFechaTurno();
+  $("#lblHoy").textContent = "Hoy " + hoyISO();
+
+  const rol = await getUserRole(user.email);
+  console.log("Rol:", rol);
+
+  await cargarCatalogos();
+});
+
+/* Sincronizar etiqueta al cambiar fecha / turno */
+$("#inpFecha").addEventListener("change", actualizarEtiquetaFechaTurno);
+$("#selTurno").addEventListener("change", actualizarEtiquetaFechaTurno);
+
+/* === AUTO-CARGA DESDE API DE PRODUCCIÓN === */
+const API_URL = "https://optima.tecnoglass.net/api/alutions_production/reporte-extruccion";
+
+/* Conversión 24h local (asumiendo el navegador ya está en hora Colombia o correcta) */
+function convertirHoraColombia24(horaStr){
+  try{
+    const d = new Date(horaStr);
+    if(isNaN(d)) return "";
+    const h = String(d.getHours()).padStart(2,"0");
+    const m = String(d.getMinutes()).padStart(2,"0");
+    return `${h}:${m}`;
+  }catch{ return ""; }
+}
+
+/* Formato 12h */
+function formato12h(hora24){
+  try{
+    const [hStr,m] = hora24.split(":");
+    let h = parseInt(hStr,10);
+    if(isNaN(h)) return hora24;
+    const ampm = h>=12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    return `${h}:${m} ${ampm}`;
+  }catch{ return hora24; }
+}
+
+/* Turno UI -> shift API */
+function turnoToShift(turno){
+  if(turno === "T1") return 1;
+  if(turno === "T2") return 2;
+  if(turno === "T3") return 3;
+  return null;
+}
+
+/* Llamado a la API filtrando por prensa, SO-ITEM y shift */
+async function buscarProduccion(prensa, soitem){
+  try{
+    const fechaUI  = $("#inpFecha").value || hoyISO();
+    const turnoUI  = $("#selTurno").value;
+    const shiftReq = turnoToShift(turnoUI);
+
+    const body = {
+      Fecha_inicial: fechaUI,
+      Fecha_final:   fechaUI,
+      Departamento:  null
+    };
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if(!data?.data?.length) return [];
+
+    const resultados = [];
+    const soBuscado = soitem.replace(/\s+/g,"").trim();
+    const prensaBuscada = prensa.trim();
+
+    for(const item of data.data){
+      if(!item.Prensa) continue;
+
+      for(const r of item.Prensa){
+        const claveApi   = `${r.so}-${r.Soitem}`;
+        const maquinaAPI = (r.Maquina || "").trim();
+        const shiftAPI   = Number(r.shift);
+
+        if(
+          maquinaAPI === prensaBuscada &&
+          claveApi === soBuscado &&
+          (!shiftReq || shiftAPI === shiftReq)
+        ){
+          const hIni24 = convertirHoraColombia24(r.HoraInicial);
+          const hFin24 = convertirHoraColombia24(r.HoraFinal);
+          resultados.push({
+            ...r,
+            horaInicial24: hIni24,
+            horaFinal24:   hFin24,
+            horaInicial12: formato12h(hIni24),
+            horaFinal12:   formato12h(hFin24)
+          });
+        }
+      }
+    }
+
+    if(resultados.length){
+      mostrarModalSeleccion(resultados);
+    }else{
+      alert("No se encontraron registros para esa combinación (prensa, SO-ITEM y turno).");
+    }
+
+    return resultados;
+
+  }catch(err){
+    console.error("Error buscando producción:", err);
+    alert("Error al conectar con la API de producción.");
+    return [];
+  }
+}
+
+/* Llenar automáticamente los campos del formulario */
+function llenarCamposProduccion(r){
+  try{
+    $("#inpHIni").value           = r.horaInicial24 || "";
+    $("#inpHFin").value           = r.horaFinal24 || "";
+    $("#inpLongTocho").value      = r.billen || "";
+    $("#inpCopiaNo").value        = r.Copia || "";
+    $("#inpCliente").value        = (r.cliente || "").trim();
+    $("#inpMatriz").value         = (r.Referencia || "").trim();
+    $("#inpTemp").value           = r.Temperatura || "";
+    $("#inpPesoBruto").value      = r.Peso || "";
+    $("#inpAleacion").value       = (r.Aleacion || "").trim();
+    $("#inpColada").value         = (r.colada || "").trim();
+    $("#inpVPrensa").value        = r.velprensa || "";
+    $("#inpVPuller").value        = r.velpuller || "";
+    $("#inpCant").value           = r.Cantidad || "";
+  }catch(err){
+    console.error("Error llenando formulario:", err);
+  }
+}
+
+/* Modal de selección API (siempre, 12h) */
+function mostrarModalSeleccion(lista){
+  const fondo = document.createElement("div");
+  fondo.style = `
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:#000c;backdrop-filter:blur(3px);z-index:100;
+  `;
+
+  const modal = document.createElement("div");
+  modal.style = `
+    background:#0a101c;border:1px solid var(--accent);
+    border-radius:10px;padding:16px;width:95%;max-width:1050px;
+    color:#eaf6ff;box-shadow:0 0 25px #000a;
+  `;
+
+  const fecha = $("#inpFecha").value || hoyISO();
+  const turno = $("#selTurno").value || "T1";
+
+  modal.innerHTML = `
+    <h3 style="margin-bottom:4px;color:var(--accent-strong);text-align:center;text-shadow:0 0 10px var(--accent-soft);">
+      📅 ${fecha} – Turno ${turno}
+    </h3>
+    <h4 style="margin-bottom:10px;color:#dbe8ff;text-align:center;font-weight:500;">
+      📋 Selecciona registro de producción
+    </h4>
+    <div style="max-height:60vh;overflow:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#121a2b;color:#9ecbff;text-align:center;">
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Ref.</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Cliente</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Copia</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Tochos</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Longitud</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Colada</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Aleación</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Hora Inicial</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Hora Final</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">V.Prensa</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Temp.</th>
+            <th style="padding:6px;border-bottom:1px solid #1e2639;">Usar</th>
+          </tr>
+        </thead>
+        <tbody id="bodyModalReg"></tbody>
+      </table>
+    </div>
+    <div style="text-align:right;margin-top:10px;">
+      <button id="cerrarModalAPI" style="padding:6px 14px;background:#131b2b;color:#9ecbff;
+        border:1px solid #2c456d;border-radius:8px;cursor:pointer;">Cerrar</button>
+    </div>
+  `;
+  fondo.appendChild(modal);
+  document.body.appendChild(fondo);
+
+  const tbody = modal.querySelector("#bodyModalReg");
+  lista.forEach((r)=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${(r.Referencia||"").trim()}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${(r.cliente||"").trim()}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${r.Copia||""}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${r.Cantidad||""}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${r.billen||""}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${(r.colada||"").trim()}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${(r.Aleacion||"").trim()}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${r.horaInicial12}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${r.horaFinal12}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${r.velprensa||""}</td>
+      <td style="padding:5px;border-bottom:1px solid #1e2639;text-align:center;">${r.Temperatura||""}</td>
+      <td style="padding:5px;text-align:center;border-bottom:1px solid #1e2639;">
+        <button style="padding:4px 10px;background:var(--accent);color:#001018;
+          border:none;border-radius:6px;font-weight:600;cursor:pointer;">Usar</button>
+      </td>
+    `;
+    tr.querySelector("button").addEventListener("click",()=>{
+      llenarCamposProduccion(r);
+      fondo.remove();
+    });
+    tbody.appendChild(tr);
+  });
+
+  modal.querySelector("#cerrarModalAPI").addEventListener("click",()=> fondo.remove());
+  fondo.addEventListener("click",(e)=>{ if(e.target===fondo) fondo.remove(); });
+}
+
+/* Evento del botón de búsqueda 🔍 */
+$("#btnBuscarAPI").addEventListener("click", async()=>{
+  const prensa = $("#selPrensa").value?.trim();
+  const soitem = $("#inpSOItem").value?.trim();
+  if(!prensa || !soitem){
+    alert("Selecciona prensa e ingresa un SO-ITEM válido.");
+    return;
+  }
+
+  const loader = document.createElement("div");
+  loader.style = `
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:#000a;color:var(--accent);font-size:14px;z-index:200;
+  `;
+  loader.textContent = "⏳ Cargando producción...";
+  document.body.appendChild(loader);
+
+  const resultados = await buscarProduccion(prensa, soitem);
+  loader.remove();
+
+  if(!resultados.length){
+    alert("No se encontraron registros para esa combinación.");
+  }
+});
+
+/* === CATÁLOGOS (Motivos / Prensas) === */
+async function cargarCatalogos(){
+  const selMotivo = $("#selMotivo");
+  selMotivo.innerHTML = "";
+  motivosCache = [];
+
+  // Motivo "Sin motivo"
+  const optSin = document.createElement("option");
+  optSin.value = "";
+  optSin.textContent = "Sin motivo";
+  selMotivo.appendChild(optSin);
+
+  // Motivos base (puedes completar con los de tu imagen)
+  const motivosBase = [
+    // Ejemplos – ajusta los códigos/descrp. según tu Excel
+    {codigo:"001", descripcion:"Cambio matriz"},
+    {codigo:"002", descripcion:"Mantenimiento programado"},
+    {codigo:"003", descripcion:"Daño mecánico"},
+    {codigo:"004", descripcion:"Falta de material"},
+    {codigo:"005", descripcion:"Ajuste de parámetros"}
+  ];
+  motivosBase.forEach(m=>{
+    const o = document.createElement("option");
+    o.value = m.codigo;
+    o.textContent = `${m.codigo} – ${m.descripcion}`;
+    selMotivo.appendChild(o);
+    motivosCache.push({codigo:m.codigo, descripcion:m.descripcion});
+  });
+
+  // Además, si tienes catálogo en Firebase, se agrega
+  try{
+    const snapMot = await get(ref(db,"erp_prensas/catalogos/motivos"));
+    if(snapMot.exists()){
+      const val = snapMot.val();
+      Object.values(val).forEach(m=>{
+        const codigo = m.codigo || "";
+        const desc   = m.descripcion || m.motivo || "";
+        if(!codigo) return;
+        const o = document.createElement("option");
+        o.value = codigo;
+        o.textContent = `${codigo} – ${desc}`;
+        selMotivo.appendChild(o);
+        motivosCache.push({codigo, descripcion:desc});
+      });
+    }
+  }catch(e){console.error(e);}
+
+  // Prensas
+  const selPrensa = $("#selPrensa");
+  selPrensa.innerHTML = "";
+  try{
+    const snapPr = await get(ref(db,"erp_prensas/catalogos/prensas"));
+    if(snapPr.exists()){
+      const val = snapPr.val();
+      Object.values(val).forEach(p=>{
+        const o = document.createElement("option");
+        o.value = p.codigo || p.nombre || "";
+        o.textContent = p.descripcion || p.nombre || p.codigo;
+        selPrensa.appendChild(o);
+      });
+    }else{
+      ["PRENSA 7-1","PRENSA 7-2","PRENSA 7-3","PRENSA 7-4",
+       "PRENSA 7-5","PRENSA 7-6","PRENSA 7-7","PRENSA 7-8",
+       "PRENSA 7-9","PRENSA 7-10"]
+        .forEach(p=>{
+          const o=document.createElement("option");
+          o.value=o.textContent=p;
+          selPrensa.appendChild(o);
+        });
+    }
+  }catch(e){console.error(e);}
+
+  $("#lblPrensaCtx").textContent = "Prensa: " + (selPrensa.value||"-");
+
+  // filtros de prensa en modal
+  const filtroPrensa = $("#filtroPrensa");
+  filtroPrensa.innerHTML = "";
+  const optAll = document.createElement("option");
+  optAll.value = "";
+  optAll.textContent = "Todas";
+  filtroPrensa.appendChild(optAll);
+  selPrensa.querySelectorAll("option").forEach(opt=>{
+    const o = document.createElement("option");
+    o.value = opt.value; o.textContent = opt.textContent;
+    filtroPrensa.appendChild(o);
+  });
+}
+
+$("#selPrensa").addEventListener("change",()=>{
+  $("#lblPrensaCtx").textContent = "Prensa: " + ($("#selPrensa").value || "-");
+});
+
+/* === LIMPIAR FORMULARIO === */
+$("#btnLimpiar").addEventListener("click", ()=>{
+  editInfo = null;
+  document.querySelectorAll(".form-panel input,.form-panel select").forEach(el=>{
+    if(el.id==="inpFecha") el.value = hoyISO();
+    else if(el.id==="selTurno") el.value = turnoAuto();
+    else if(el.tagName==="SELECT") el.selectedIndex = 0;
+    else el.value = "";
+  });
+  actualizarEtiquetaFechaTurno();
+  $("#lblPrensaCtx").textContent = "Prensa: " + ($("#selPrensa").value || "-");
+});
+
+/* === GUARDAR REGISTRO === */
+$("#btnGuardar").addEventListener("click", guardarRegistro);
+
+async function guardarRegistro(){
+  const user = auth.currentUser;
+  if(!user){alert("Inicia sesión primero.");return;}
+
+  const data = {
+    fecha:        $("#inpFecha").value,
+    turno:        $("#selTurno").value,
+    operador:     $("#inpOperador").value,
+    supervisor:   $("#inpSupervisor").value,
+    prensa:       $("#selPrensa").value,
+    cliente:      $("#inpCliente").value,
+    soItem:       $("#inpSOItem").value,
+    copiaNo:      $("#inpCopiaNo").value,
+    matrizRef:    $("#inpMatriz").value,
+    pesoBrutoKg:  Number($("#inpPesoBruto").value || 0),
+
+    hIni:         $("#inpHIni").value,
+    hFin:         $("#inpHFin").value,
+    vPrensa:      Number($("#inpVPrensa").value || 0),
+    vPuller:      Number($("#inpVPuller").value || 0),
+
+    pRomp:        Number($("#inpPRomp").value || 0),
+    pTrab:        Number($("#inpPTrab").value || 0),
+    pSell:        Number($("#inpPSell").value || 0),
+
+    aleacion:     $("#inpAleacion").value,
+    tipoTocho:    $("#inpTipoTocho").value,
+    longTocho:    Number($("#inpLongTocho").value || 0),
+    colada:       $("#inpColada").value,
+    tempMatriz:   Number($("#inpTempMatriz").value || 0),
+    tempCont:     Number($("#inpTempContenedor").value || 0),
+    temp:         Number($("#inpTemp").value || 0),
+    cantTochos:   Number($("#inpCant").value || 0),
+
+    motivoCod:    $("#selMotivo").value || "",
+    motivoDesc:   $("#selMotivo").selectedOptions[0]?.textContent || "",
+    obs:          $("#inpObs").value,
+
+    createdBy:    user.email
+  };
+
+  if(!data.operador || !data.prensa || !data.fecha || !data.turno || !data.soItem || !data.matrizRef){
+    alert("Completa: Operador, Prensa, Fecha, Turno, SO-ITEM y Matriz.");
+    return;
+  }
+
+  const fechaKey = data.fecha;
+  const baseRef  = ref(db, "erp_prensas/reportes/" + fechaKey);
+
+  try{
+    if(editInfo && editInfo.fechaKey === fechaKey){
+      data.updatedAt = new Date().toISOString();
+      data.updatedBy = user.email;
+      await update(child(baseRef, editInfo.id), data);
+    }else if(editInfo && editInfo.fechaKey !== fechaKey){
+      await set(ref(db,"erp_prensas/reportes/" + editInfo.fechaKey + "/" + editInfo.id), null);
+      const newRef = push(baseRef);
+      data.createdAt = new Date().toISOString();
+      await set(newRef, data);
+      editInfo = {fechaKey, id:newRef.key};
+    }else{
+      const newRef = push(baseRef);
+      data.createdAt = new Date().toISOString();
+      await set(newRef, data);
+      editInfo = {fechaKey, id:newRef.key};
+    }
+
+    await validarContraReceta(data);
+
+    alert("✅ Registro guardado correctamente.");
+  }catch(err){
+    console.error(err);
+    alert("Error guardando: " + err.message);
+  }
+}
+
+/* === VALIDACIÓN CONTRA RECETA + ALERTA === */
+async function validarContraReceta(data){
+  if(!data.matrizRef) return;
+
+  try{
+    const snap = await get(ref(db, "erp_prensas/recetas/" + matrizKey(data.matrizRef)));
+    if(!snap.exists()) return;
+
+    const r = snap.val();
+    const desviaciones = [];
+
+    const vP  = data.vPrensa;
+    const vU  = data.vPuller;
+    const tT  = data.temp;        // Temp tocho
+    const tM  = data.tempMatriz;  // 🔹 Temp matriz
+    const tC  = data.tempCont;    // 🔹 Temp contenedor
+
+    // Velocidad prensa
+    if(r.vPrensaMin!=null && vP && vP < r.vPrensaMin) desviaciones.push(`V.Prensa por debajo (${vP} < ${r.vPrensaMin})`);
+    if(r.vPrensaMax!=null && vP && vP > r.vPrensaMax) desviaciones.push(`V.Prensa por encima (${vP} > ${r.vPrensaMax})`);
+
+    // Velocidad puller
+    if(r.vPullerMin!=null && vU && vU < r.vPullerMin) desviaciones.push(`V.Puller por debajo (${vU} < ${r.vPullerMin})`);
+    if(r.vPullerMax!=null && vU && vU > r.vPullerMax) desviaciones.push(`V.Puller por encima (${vU} > ${r.vPullerMax})`);
+
+    // Temp tocho
+    if(r.tempMin!=null && tT && tT < r.tempMin)  desviaciones.push(`Temp tocho por debajo (${tT} < ${r.tempMin})`);
+    if(r.tempMax!=null && tT && tT > r.tempMax)  desviaciones.push(`Temp tocho por encima (${tT} > ${r.tempMax})`);
+
+    // 🔹 Temp matriz
+    if(r.tempMatrizMin!=null && tM && tM < r.tempMatrizMin) desviaciones.push(`Temp matriz por debajo (${tM} < ${r.tempMatrizMin})`);
+    if(r.tempMatrizMax!=null && tM && tM > r.tempMatrizMax) desviaciones.push(`Temp matriz por encima (${tM} > ${r.tempMatrizMax})`);
+
+    // 🔹 Temp contenedor
+    if(r.tempContMin!=null && tC && tC < r.tempContMin) desviaciones.push(`Temp contenedor por debajo (${tC} < ${r.tempContMin})`);
+    if(r.tempContMax!=null && tC && tC > r.tempContMax) desviaciones.push(`Temp contenedor por encima (${tC} > ${r.tempContMax})`);
+
+    if(desviaciones.length){
+      const alerta = {
+        fecha:      data.fecha,
+        prensa:     data.prensa,
+        matrizRef:  data.matrizRef,
+        vPrensa:    data.vPrensa,
+        vPuller:    data.vPuller,
+        temp:       data.temp,        // Tocho
+        tempMatriz: data.tempMatriz,  // 🔹
+        tempCont:   data.tempCont,    // 🔹
+        motivoCod:  data.motivoCod,
+        motivoDesc: data.motivoDesc,
+        descripcion: desviaciones.join("; "),
+        createdBy:  data.createdBy,
+        createdAt:  new Date().toISOString()
+      };
+
+      await push(ref(db,"erp_prensas/alertas"), alerta);
+
+      reproducirSonidoAlerta();
+      mostrarToastAlerta(alerta.descripcion);
+    }
+  }catch(err){
+    console.error(err);
+  }
+}
+
+/* === SONIDO DE ALERTA === */
+function reproducirSonidoAlerta(){
+  try{
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "square";
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.6);
+  }catch(e){
+    console.warn("No se pudo reproducir el sonido de alerta:", e);
+  }
+}
+
+/* === TOAST LOCAL EN ERP === */
+function mostrarToastAlerta(msg){
+  const old = document.getElementById("toastAlerta");
+  if(old) old.remove();
+
+  const div = document.createElement("div");
+  div.id = "toastAlerta";
+  div.style.position = "fixed";
+  div.style.bottom = "15px";
+  div.style.right = "15px";
+  div.style.background = "#ff4b6a";
+  div.style.color = "#fff";
+  div.style.padding = "10px 16px";
+  div.style.borderRadius = "8px";
+  div.style.boxShadow = "0 0 20px #000a";
+  div.style.zIndex = "9999";
+  div.style.fontSize = "13px";
+  div.style.fontWeight = "500";
+  div.textContent = "⚠️ " + msg;
+  document.body.appendChild(div);
+
+  setTimeout(()=>{ div.remove(); }, 5500);
+}
+
+/* === MODAL REPORTE === */
+$("#btnVerRegistros").addEventListener("click", ()=>{
+  const f = $("#inpFecha").value || hoyISO();
+  const t = $("#selTurno").value || "T1";
+  $("#filtroFecha").value = f;
+  $("#filtroTurno").value = t;
+  cargarRegistros();
+});
+$("#btnCerrarModal").addEventListener("click", ()=> modalRegistros.classList.remove("show"));
+$("#btnAplicarFiltros").addEventListener("click", cargarRegistros);
+$("#btnDescargarCsvModal").addEventListener("click", descargarXlsxFiltrado);
+
+async function cargarRegistros(){
+  const fechaSel = $("#filtroFecha").value || hoyISO();
+
+  registrosCache = [];
+  const snap = await get(ref(db,"erp_prensas/reportes/" + fechaSel));
+  if(snap.exists()){
+    Object.entries(snap.val()).forEach(([id,reg])=>{
+      registrosCache.push({id,fechaKey:fechaSel,...reg});
+    });
+  }
+
+  pintarTablaDesdeCache();
+  const t = $("#filtroTurno").value;
+  const extra = t ? ` · Turno: ${t}` : "";
+  $("#lblFechaModal").textContent = `Fecha: ${fechaSel}${extra}`;
+  modalRegistros.classList.add("show");
+}
+
+function getRegistrosFiltrados(){
+  const prensa = $("#filtroPrensa").value.trim().toLowerCase();
+  const matriz = $("#filtroMatriz").value.trim().toLowerCase();
+  const oper   = $("#filtroOperador").value.trim().toLowerCase();
+  const turnoF = $("#filtroTurno").value;
+
+  return registrosCache.filter(r=>{
+    if(prensa && String(r.prensa||"").toLowerCase()!==prensa) return false;
+    if(matriz && !String(r.matrizRef||"").toLowerCase().includes(matriz)) return false;
+    if(oper   && !String(r.operador||"").toLowerCase().includes(oper)) return false;
+    if(turnoF && String(r.turno||"") !== turnoF) return false;
+    return true;
+  });
+}
+
+function pintarTablaDesdeCache(){
+  const tbody = $("#tblRegistros tbody");
+  tbody.innerHTML = "";
+  const filtrados = getRegistrosFiltrados();
+
+  filtrados.forEach(reg=>{
+    const tr=document.createElement("tr");
+    const motivoTxt = (reg.motivoCod ? reg.motivoDesc||reg.motivoCod : "");
+
+    // ✅ Validaciones de campos requeridos para habilitar "Receta"
+    const tieneVelocidades =
+      reg.vPrensa && reg.vPuller &&
+      reg.vPrensa !== "" && reg.vPuller !== "";
+    const tieneTemperaturas =
+      reg.temp && reg.tempMatriz && reg.tempCont &&
+      reg.temp !== "" && reg.tempMatriz !== "" && reg.tempCont !== "";
+
+    const habilitado = (tieneVelocidades && tieneTemperaturas);
+
+    const botonReceta = habilitado
+      ? `<button class="mini-btn mini-prop" data-prop="${reg.id}" data-f="${reg.fechaKey}">Receta</button>`
+      : `<button class="mini-btn mini-prop" disabled style="opacity:0.4;cursor:not-allowed;" title="Completa velocidades y temperaturas para habilitar">Receta</button>`;
+
+    tr.innerHTML = `
+      <td>
+        <button class="mini-btn" data-edit="${reg.id}" data-f="${reg.fechaKey}">
+          Editar
+        </button>
+      </td>
+      <td>${botonReceta}</td>
+      <td>${reg.fechaKey||""}</td>
+      <td>${reg.hIni||""}</td>
+      <td>${reg.hFin||""}</td>
+      <td>${reg.operador||""}</td>
+      <td>${reg.supervisor||""}</td>
+      <td>${reg.prensa||""}</td>
+      <td>${reg.soItem||""}</td>
+      <td>${reg.cliente||""}</td>
+      <td>${reg.matrizRef||""}</td>
+      <td>${reg.copiaNo||""}</td>
+      <td>${reg.vPrensa||""}</td>
+      <td>${reg.vPuller||""}</td>
+      <td>${reg.pRomp||""}</td>
+      <td>${reg.pTrab||""}</td>
+      <td>${reg.pSell||""}</td>
+      <td>${reg.aleacion||""}</td>
+      <td>${reg.tipoTocho||""}</td>
+      <td>${reg.longTocho||""}</td>
+      <td>${reg.colada||""}</td>
+      <td>${reg.temp||""}</td>
+      <td>${reg.tempMatriz||""}</td>
+      <td>${reg.tempCont||""}</td>
+      <td>${reg.cantTochos||""}</td>
+      <td>${reg.pesoBrutoKg||""}</td>
+      <td>${motivoTxt}</td>
+      <td>${reg.obs||""}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  $("#lblTotalReg").textContent = `Total registros (filtrados): ${filtrados.length}`;
+
+  // Botón EDITAR (ya existente)
+  tbody.querySelectorAll("button[data-edit]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const id = btn.dataset.edit;
+      const f  = btn.dataset.f;
+      const r  = registrosCache.find(x=>x.id===id && x.fechaKey===f);
+      if(r) cargarEnFormularioDesdeRegistro(r);
+      modalRegistros.classList.remove("show");
+    });
+  });
+
+  // 🔹 Botón "Receta" (solo si está habilitado)
+  tbody.querySelectorAll("button[data-prop]:not([disabled])").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const id = btn.dataset.prop;
+      const f  = btn.dataset.f;
+      const r  = registrosCache.find(x=>x.id===id && x.fechaKey===f);
+      if(r) proponerComoReceta(r);
+    });
+  });
+}
+
+/* Re-pintar en vivo cuando cambian filtros rápidos */
+["filtroPrensa","filtroMatriz","filtroOperador","filtroTurno"].forEach(id=>{
+  document.getElementById(id).addEventListener("input",()=> {
+    if(registrosCache.length) pintarTablaDesdeCache();
+  });
+});
+
+function cargarEnFormularioDesdeRegistro(reg){
+  editInfo = {fechaKey:reg.fechaKey, id:reg.id};
+
+  $("#inpFecha").value      = reg.fechaKey || hoyISO();
+  $("#selTurno").value      = reg.turno || turnoAuto();
+  $("#inpOperador").value   = reg.operador || "";
+  $("#inpSupervisor").value = reg.supervisor || "";
+  $("#selPrensa").value     = reg.prensa || $("#selPrensa").value;
+  $("#inpCliente").value    = reg.cliente || "";
+  $("#inpSOItem").value     = reg.soItem || "";
+  $("#inpCopiaNo").value    = reg.copiaNo || "";
+  $("#inpMatriz").value     = reg.matrizRef || "";
+  $("#inpPesoBruto").value  = reg.pesoBrutoKg || "";
+
+  $("#inpHIni").value       = reg.hIni || "";
+  $("#inpHFin").value       = reg.hFin || "";
+  $("#inpVPrensa").value    = reg.vPrensa || "";
+  $("#inpVPuller").value    = reg.vPuller || "";
+
+  $("#inpPRomp").value      = reg.pRomp || "";
+  $("#inpPTrab").value      = reg.pTrab || "";
+  $("#inpPSell").value      = reg.pSell || "";
+
+  $("#inpAleacion").value   = reg.aleacion || "";
+  $("#inpTipoTocho").value  = reg.tipoTocho || "";
+  $("#inpLongTocho").value  = reg.longTocho || "";
+  $("#inpColada").value     = reg.colada || "";
+  $("#inpTemp").value       = reg.temp || "";
+  $("#inpTempMatriz").value = reg.tempMatriz || "";
+  $("#inpTempContenedor").value = reg.tempCont || "";
+  $("#inpCant").value       = reg.cantTochos || "";
+
+  $("#selMotivo").value     = reg.motivoCod || "";
+  $("#inpObs").value        = reg.obs || "";
+
+  actualizarEtiquetaFechaTurno();
+  $("#lblPrensaCtx").textContent = "Prensa: " + ($("#selPrensa").value || "-");
+}
+
+// === PROPONER COMO RECETA (desde el modal) ===
+async function proponerComoReceta(reg){
+  // Validamos que tenga los parámetros clave llenos
+  const tieneVelocidades =
+    reg.vPrensa != null && reg.vPrensa !== "" &&
+    reg.vPuller != null && reg.vPuller !== "";
+  const tieneTemperaturas =
+    reg.temp != null && reg.temp !== "" &&
+    reg.tempMatriz != null && reg.tempMatriz !== "" &&
+    reg.tempCont != null && reg.tempCont !== "";
+
+  if(!tieneVelocidades || !tieneTemperaturas){
+    alert("Para proponer como receta se requieren velocidades y todas las temperaturas (tocho, matriz y contenedor).");
+    return;
+  }
+
+  const confirmar = confirm(
+    `¿Enviar los parámetros de la matriz ${reg.matrizRef||"-"} de la prensa ${reg.prensa||"-"} ` +
+    `como propuesta de receta para revisión del coordinador?`
+  );
+  if(!confirmar) return;
+
+  const user = auth.currentUser;
+  const correoActual = user?.email || "";
+
+  const payload = {
+    fecha:       reg.fechaKey || reg.fecha || "",
+    turno:       reg.turno || "",
+    prensa:      reg.prensa || "",
+    matrizRef:   reg.matrizRef || "",
+    soItem:      reg.soItem || "",
+    cliente:     reg.cliente || "",
+    operador:    reg.operador || "",
+    supervisor:  reg.supervisor || "",
+    reporteId:   reg.id,          // vínculo al registro original
+    parametros: {
+      vPrensa:       reg.vPrensa ?? null,
+      vPuller:       reg.vPuller ?? null,
+      tempTocho:     reg.temp ?? null,
+      tempMatriz:    reg.tempMatriz ?? null,
+      tempContenedor:reg.tempCont ?? null
+    },
+    estado:      "pendiente",
+    creadoPor:   correoActual,
+    creadoEn:    new Date().toISOString()
+  };
+
+  try{
+    await push(ref(db,"erp_prensas/solicitudes_recetas"), payload);
+    mostrarToastReceta(
+      `Propuesta enviada para matriz ${payload.matrizRef||"-"} · ${payload.prensa||""}`
+    );
+  }catch(err){
+    console.error("Error guardando propuesta de receta:", err);
+    alert("Error al enviar la propuesta de receta.");
+  }
+}
+
+// Toast pequeño abajo a la derecha para esta acción
+function mostrarToastReceta(msg){
+  const id = "toastReceta";
+  const old = document.getElementById(id);
+  if(old) old.remove();
+
+  const div = document.createElement("div");
+  div.id = id;
+  div.style.position = "fixed";
+  div.style.bottom = "15px";
+  div.style.right = "15px";
+  div.style.background = "#121722";
+  div.style.border = "1px solid #2f80ed";
+  div.style.color = "#e5ecff";
+  div.style.padding = "8px 14px";
+  div.style.borderRadius = "10px";
+  div.style.boxShadow = "0 0 18px #000c";
+  div.style.zIndex = "9999";
+  div.style.fontSize = "12px";
+  div.style.display = "flex";
+  div.style.alignItems = "center";
+  div.style.gap = "8px";
+
+  div.innerHTML = `<span>🧪</span><span>${msg}</span>`;
+  document.body.appendChild(div);
+
+  setTimeout(()=>{ div.remove(); }, 4500);
+}
+
+
+
+/* === DESCARGA XLSX SOLO DE LO FILTRADO (REPORTE DE PRENSA) === */
+function descargarXlsxFiltrado(){
+  const filtrados = getRegistrosFiltrados();
+  if(!filtrados.length){
+    alert("No hay registros filtrados para descargar.");
+    return;
+  }
+
+  const fecha = $("#filtroFecha").value || hoyISO();
+  const first = filtrados[0] || {};
+  const operador   = first.operador || "";
+  const supervisor = first.supervisor || "";
+  const turno      = first.turno || "";
+
+  const headers = [
+    "N°","SO-ITEM","CLIENTE","MATRIZ REF.","COPIA No.",
+    "H.INICIAL","H.FINAL",
+    "VEL. PRENSA MM/SEG","VEL. PULLER MM/SEG",
+    "ROMPIMIENTO (BAR)","TRABAJO (BAR)","PRESIÓN SELLADO (BAR)",
+    "ALEACIÓN","TIPO","LONG. (mm)","COLADA",
+    "TEMP MATRIZ (°C)","TEMP CONTENEDOR (°C)","TEMP TOCHO (°C)",
+    "CANT. TOCHOS","PESO BRUTO (kg)","CÓDIGO MOTIVO"
+  ];
+
+  const aoa = [];
+
+  // Título
+  aoa.push(["","","","","","","","REPORTE DE PRENSA"]);
+  aoa.push([]);
+  aoa.push(["FECHA:", fecha, "", "", "TURNO:", turno]);
+  aoa.push(["OPERADOR:", operador, "", "", "SUPERVISOR:", supervisor]);
+  aoa.push([]);
+  aoa.push(headers);
+
+  let totalCant = 0;
+  let totalPeso = 0;
+
+  filtrados.forEach((r,idx)=>{
+    totalCant += Number(r.cantTochos||0);
+    totalPeso += Number(r.pesoBrutoKg||0);
+
+    aoa.push([
+      idx+1,
+      r.soItem || "",
+      r.cliente || "",
+      r.matrizRef || "",
+      r.copiaNo || "",
+      r.hIni || "",
+      r.hFin || "",
+      r.vPrensa ?? "",
+      r.vPuller ?? "",
+      r.pRomp ?? "",
+      r.pTrab ?? "",
+      r.pSell ?? "",
+      r.aleacion || "",
+      r.tipoTocho || "",
+      r.longTocho ?? "",
+      r.colada || "",
+      r.tempMatriz ?? "",
+      r.tempCont ?? "",
+      r.temp ?? "",
+      r.cantTochos ?? "",
+      r.pesoBrutoKg ?? "",
+      r.motivoCod || ""
+    ]);
+  });
+
+  aoa.push([]);
+
+  // Fila de totales: TOTAL en col 19 y 20 (Cant. Tochos y Peso Bruto)
+  const totalRow = new Array(headers.length).fill("");
+  totalRow[18] = "TOTAL:";
+  totalRow[19] = totalCant;
+  totalRow[20] = totalPeso;
+  aoa.push(totalRow);
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+  const widths = [
+    4,10,18,12,10,8,8,18,18,16,16,18,
+    10,10,10,12,12,14,12,12,16,12
+  ];
+  ws['!cols'] = widths.map(w=>({wch:w}));
+
+  ws['!merges'] = [
+    {s:{r:0,c:7}, e:{r:0,c:headers.length-1}}, // Título
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Reporte");
+
+  // Hoja de motivos de parada
+  if(motivosCache.length){
+    const aoaMot = [];
+    aoaMot.push(["MOTIVO PARADA"]);
+    aoaMot.push(["CÓDIGO","DESCRIPCIÓN"]);
+    motivosCache.forEach(m=>{
+      aoaMot.push([m.codigo, m.descripcion]);
+    });
+    const wsMot = XLSX.utils.aoa_to_sheet(aoaMot);
+    wsMot['!cols'] = [{wch:10},{wch:40}];
+    wsMot['!merges'] = [{s:{r:0,c:0},e:{r:0,c:1}}];
+    XLSX.utils.book_append_sheet(wb, wsMot, "Motivos");
+  }
+
+  const nombre = "REPORTE_PRENSA_" + hoyISO() + ".xlsx";
+  XLSX.writeFile(wb, nombre);
+}
+
+</script>
+</body>
+</html>
