@@ -1,5 +1,6 @@
 const CACHE_NAME = "erp-recetas-cache-v1";
 const urlsToCache = [
+  "./",
   "./RECETAS.html",
   "./manifest_recetas.json",
   "./icon-192.png",
@@ -19,9 +20,8 @@ self.addEventListener("activate", e => {
 });
 
 self.addEventListener("fetch", e => {
-  e.respondWith(
-    caches.match(e.request).then(res => res || fetch(e.request))
-  );
+  e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
 });
+
 
 
