@@ -1,5 +1,6 @@
-importScripts('https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging-compat.js');
+
+importScripts("https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging-compat.js");
 
 firebase.initializeApp({
   apiKey: "AIzaSyAB4UlwaVJzc4U4VbmddLf4mejKAOvTufw",
@@ -10,15 +11,3 @@ firebase.initializeApp({
 });
 
 const messaging = firebase.messaging();
-
-// 🔕 Maneja notificación cuando la app está cerrada o en segundo plano
-messaging.onBackgroundMessage((payload) => {
-  const { title, body } = payload.notification;
-  const options = {
-    body,
-    icon: "/icon-192.png",
-    vibrate: [200, 100, 200],
-    data: payload.data || {}
-  };
-  self.registration.showNotification(title, options);
-});
