@@ -113,6 +113,45 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 ::-webkit-scrollbar{height:6px;width:6px;}
 ::-webkit-scrollbar-track{background:#05070b;}
 ::-webkit-scrollbar-thumb{background:#333d55;border-radius:999px;}
+
+/* === VISTA MÓVIL === */
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+  .side-nav {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid #22283a;
+    justify-content: space-around;
+  }
+  .side-nav button, .side-nav a {
+    flex: 1;
+    font-size: 11px;
+    padding: 6px 4px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .main-panel {
+    padding: 10px;
+  }
+  .card {
+    box-shadow: none;
+    border: 1px solid #1a2033;
+  }
+  .topbar {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .topbar-right {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 11px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -446,9 +485,10 @@ let knownAlertKeys = new Set();
 
 /* === SERVICE WORKER PWA (recetas) === */
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw_recetas.js')
+ navigator.serviceWorker.register('/Prensas/firebase-messaging-sw.js')
   .then(() => console.log("Service Worker RECETAS registrado"))
   .catch(console.error);
+
 }
 
 /* === AUTH === */
@@ -1019,6 +1059,15 @@ function showToast(titulo, cuerpo, alerta){
   setTimeout(()=>{div.remove();}, 8000);
 }
 
+/* === HABILITAR AUDIO TRAS PRIMER TOQUE === */
+document.addEventListener("click", () => {
+  const sound = document.getElementById("alertSound");
+  if (sound) {
+    sound.play().catch(() => {
+      console.warn("Sonido habilitado después del primer toque.");
+    });
+  }
+}, { once: true });
 
 
 </script>
@@ -1029,3 +1078,4 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
