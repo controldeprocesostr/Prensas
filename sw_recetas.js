@@ -1,7 +1,6 @@
 const CACHE_NAME = "erp-recetas-cache-v1";
 const urlsToCache = [
   "/Prensas/RECETAS.html",
-  "/Prensas/ERP_PRENSAS_ALUTIONS.html",
   "/Prensas/manifest_recetas.json",
   "/Prensas/icon-192.png",
   "/Prensas/icon-512.png"
