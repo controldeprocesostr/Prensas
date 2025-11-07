@@ -444,12 +444,12 @@ const $ = (s)=>document.querySelector(s);
 let chartMotivos;
 let knownAlertKeys = new Set();
 
-/* === SERVICE WORKER PWA (recetas) === */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw_recetas.js')
-  .then(() => console.log("Service Worker RECETAS registrado"))
-  .catch(console.error);
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/Prensas/sw_recetas.js')
+    .then(() => console.log("Service Worker RECETAS registrado"))
+    .catch(console.error);
 }
+
 
 /* === AUTH === */
 onAuthStateChanged(auth, async(user)=>{
@@ -1029,4 +1029,5 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
 
