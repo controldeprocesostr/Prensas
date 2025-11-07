@@ -1,7 +1,7 @@
 {
   "name": "ERP Recetas & KPIs",
   "short_name": "ERP Recetas",
-  "start_url": "/Prensas/RECETAS.html",
+  "start_url": "index.html",
   "scope": "/Prensas/",
   "display": "standalone",
   "background_color": "#05070b",
@@ -12,6 +12,7 @@
     { "src": "/Prensas/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
+
 
 
 
