@@ -115,43 +115,50 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 ::-webkit-scrollbar-thumb{background:#333d55;border-radius:999px;}
 
 /* === VISTA MÓVIL === */
-@media (max-width: 900px) {
-  .layout {
-    flex-direction: column;
-  }
-  .side-nav {
-    width: 100%;
-    flex-direction: row;
-    overflow-x: auto;
-    border-right: none;
-    border-bottom: 1px solid #22283a;
-    justify-content: space-around;
-  }
-  .side-nav button, .side-nav a {
-    flex: 1;
-    font-size: 11px;
-    padding: 6px 4px;
-    text-align: center;
-    white-space: nowrap;
-  }
-  .main-panel {
-    padding: 10px;
-  }
-  .card {
-    box-shadow: none;
-    border: 1px solid #1a2033;
+/* Ajuste real de vista móvil tipo app */
+@media (max-width: 600px) {
+  html, body {
+    font-size: 14px;
+    overflow-x: hidden;
+    background: #05070b;
   }
   .topbar {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 8px 10px;
+    height: auto;
+  }
+  .app-title div { font-size: 13px; }
+  .layout {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .side-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 4px;
     gap: 4px;
   }
-  .topbar-right {
-    width: 100%;
-    justify-content: space-between;
+  .side-nav button {
+    flex: 1;
+    padding: 6px;
     font-size: 11px;
   }
+  .main-panel {
+    padding: 8px;
+  }
+  input, select, textarea {
+    font-size: 12px;
+  }
+  .card {
+    padding: 8px;
+    border-radius: 8px;
+  }
+  .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
 }
-
 </style>
 </head>
 <body>
