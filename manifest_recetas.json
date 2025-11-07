@@ -3,8 +3,7 @@
 {
   "name": "ERP Recetas Tecnoglass",
   "short_name": "Recetas",
-  "start_url": "/Prensas/RECETAS.html",
-  "scope": "/Prensas/",
+  "start_url": "RECETAS.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#05070b",
@@ -22,4 +21,5 @@
     }
   ]
 }
+
 
