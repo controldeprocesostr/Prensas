@@ -1,25 +1,17 @@
-
-
 {
-  "name": "ERP Recetas Tecnoglass",
-  "short_name": "Recetas",
-  "start_url": "RECETAS.html",
+  "name": "ERP Recetas & KPIs",
+  "short_name": "ERP Recetas",
+  "start_url": "/Prensas/RECETAS.html",
+  "scope": "/Prensas/",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#05070b",
   "theme_color": "#00e5ff",
+  "orientation": "portrait",
   "icons": [
-    {
-      "src": "/Prensas/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/Prensas/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "/Prensas/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/Prensas/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
+
 
 
