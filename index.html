@@ -115,50 +115,43 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 ::-webkit-scrollbar-thumb{background:#333d55;border-radius:999px;}
 
 /* === VISTA MÓVIL === */
-/* Ajuste real de vista móvil tipo app */
-@media (max-width: 600px) {
-  html, body {
-    font-size: 14px;
-    overflow-x: hidden;
-    background: #05070b;
-  }
-  .topbar {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 8px 10px;
-    height: auto;
-  }
-  .app-title div { font-size: 13px; }
+@media (max-width: 900px) {
   .layout {
     flex-direction: column;
-    gap: 6px;
   }
   .side-nav {
+    width: 100%;
     flex-direction: row;
     overflow-x: auto;
-    padding: 4px;
-    gap: 4px;
+    border-right: none;
+    border-bottom: 1px solid #22283a;
+    justify-content: space-around;
   }
-  .side-nav button {
+  .side-nav button, .side-nav a {
     flex: 1;
-    padding: 6px;
     font-size: 11px;
+    padding: 6px 4px;
+    text-align: center;
+    white-space: nowrap;
   }
   .main-panel {
-    padding: 8px;
-  }
-  input, select, textarea {
-    font-size: 12px;
+    padding: 10px;
   }
   .card {
-    padding: 8px;
-    border-radius: 8px;
+    box-shadow: none;
+    border: 1px solid #1a2033;
   }
-  .btn {
-    padding: 6px 10px;
-    font-size: 12px;
+  .topbar {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .topbar-right {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 11px;
   }
 }
+
 </style>
 </head>
 <body>
@@ -490,12 +483,10 @@ const $ = (s)=>document.querySelector(s);
 let chartMotivos;
 let knownAlertKeys = new Set();
 
-/* === SERVICE WORKER PWA (recetas) === */
 if('serviceWorker' in navigator){
- navigator.serviceWorker.register('/Prensas/firebase-messaging-sw.js')
-  .then(() => console.log("Service Worker RECETAS registrado"))
-  .catch(console.error);
-
+  navigator.serviceWorker.register('firebase-messaging-sw.js')
+   .then(() => console.log("Service Worker RECETAS registrado"))
+   .catch(console.error);
 }
 
 /* === AUTH === */
@@ -1085,4 +1076,6 @@ document.addEventListener("click", () => {
        preload="auto"></audio>
 </body>
 </html>
+
+
 
