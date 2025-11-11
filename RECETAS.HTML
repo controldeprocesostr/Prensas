@@ -113,6 +113,17 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 ::-webkit-scrollbar{height:6px;width:6px;}
 ::-webkit-scrollbar-track{background:#05070b;}
 ::-webkit-scrollbar-thumb{background:#333d55;border-radius:999px;}
+
+ /* === CENTRAR TEXTO EN TODAS LAS TABLAS ERP === */
+.table th, .table td,
+.tablaRecetas th, .tablaRecetas td,
+.tablaAlertas th, .tablaAlertas td,
+.tablaSolicitudes th, .tablaSolicitudes td,
+.tablaHistorial th, .tablaHistorial td {
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
 </style>
 </head>
 <body>
@@ -1029,5 +1040,6 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
 
 
