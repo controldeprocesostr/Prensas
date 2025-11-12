@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <title>Recetas & KPIs – ERP PRENSAS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="manifest" href="/Prensas/manifest_recetas.json">
+<link rel="manifest" href="manifest_recetas.json">
 <meta name="theme-color" content="#00e5ff">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -113,17 +113,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 ::-webkit-scrollbar{height:6px;width:6px;}
 ::-webkit-scrollbar-track{background:#05070b;}
 ::-webkit-scrollbar-thumb{background:#333d55;border-radius:999px;}
-
- /* === CENTRAR TEXTO EN TODAS LAS TABLAS ERP === */
-.table th, .table td,
-.tablaRecetas th, .tablaRecetas td,
-.tablaAlertas th, .tablaAlertas td,
-.tablaSolicitudes th, .tablaSolicitudes td,
-.tablaHistorial th, .tablaHistorial td {
-  text-align: center !important;
-  vertical-align: middle !important;
-}
-
 </style>
 </head>
 <body>
@@ -224,6 +213,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
     <input type="number" id="rcTContMax" />
   </div>
 </div>
+
+<div class="field-row-3">
+  <div>
+    <label>Tensión mínima (N)</label>
+    <input type="number" id="tensionMin" />
+  </div>
+  <div>
+    <label>Tensión máxima (N)</label>
+    <input type="number" id="tensionMax" />
+  </div>
+  <div>
+    <label>Copia No.</label>
+    <input type="number" id="copiaNo" />
+  </div>
+</div>
+
+<div class="field-row-3">
+  <div>
+    <label>Diámetro Arepas mín. (mm)</label>
+    <input type="number" id="diamArepasMin" />
+  </div>
+  <div>
+    <label>Diámetro Arepas máx. (mm)</label>
+    <input type="number" id="diamArepasMax" />
+  </div>
+</div>
+
 
         <div style="margin-top:8px;display:flex;gap:8px;">
           <button class="btn btn-primary" id="btnGuardarReceta">Guardar / actualizar receta</button>
@@ -438,7 +454,7 @@ onMessage(messaging, (payload) => {
   const { title, body } = payload.notification;
   const noti = new Notification(title, {
     body,
-    icon: "/Prensas/icon-192.png",
+    icon: "./icon-192.png",
     vibrate: [200, 100, 200]
   });
 
@@ -455,12 +471,12 @@ const $ = (s)=>document.querySelector(s);
 let chartMotivos;
 let knownAlertKeys = new Set();
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/Prensas/sw_recetas.js')
-    .then(() => console.log("Service Worker RECETAS registrado"))
-    .catch(console.error);
+/* === SERVICE WORKER PWA (recetas) === */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw_recetas.js')
+  .then(() => console.log("Service Worker RECETAS registrado"))
+  .catch(console.error);
 }
-
 
 /* === AUTH === */
 onAuthStateChanged(auth, async(user)=>{
@@ -588,7 +604,9 @@ $("#btnGuardarReceta").addEventListener("click", async()=>{
   const matriz = $("#rcMatriz").value.trim();
   if(!matriz){alert("Indica una matriz.");return;}
 
-  const recetaRef = ref(db, "erp_prensas/recetas/" + matrizKey(matriz));
+ // 🔹 Construir clave única usando matriz + copia
+const copia = $("#copiaNo").value.trim() || "base";
+const recetaKey = matrizKey(matriz) + "_" + copia;
   const snapAnterior = await get(recetaRef);
   const anterior = snapAnterior.exists() ? snapAnterior.val() : {};
 
@@ -608,10 +626,18 @@ $("#btnGuardarReceta").addEventListener("click", async()=>{
     tempContMax: numOrNull($("#rcTContMax").value),
     updatedBy: user.email,
     updatedAt: new Date().toISOString()
+    tensionMin: Number($("#tensionMin").value || 0),
+tensionMax: Number($("#tensionMax").value || 0),
+diamArepasMin: Number($("#diamArepasMin").value || 0),
+diamArepasMax: Number($("#diamArepasMax").value || 0),
+copiaNo: Number($("#copiaNo").value || 0),
+
   };
 
-  await set(recetaRef, data);
-  alert("Receta guardada/actualizada.");
+  // 🔹 Guardar receta completa en Firebase
+await set(ref(db, "erp_prensas/recetas/" + recetaKey), data);
+  alert(`Receta guardada/actualizada (${matriz} – copia ${copia})`);
+
 
   // 🔹 Detectar diferencias entre la versión anterior y la nueva
   const diferencias = {};
@@ -1040,6 +1066,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
