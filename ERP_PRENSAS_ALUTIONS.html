@@ -291,16 +291,17 @@ h1,h2,h3{font-weight:500;}
   align-items:center;
   font-size:11px;
 }
-.table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:11px;
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  table-layout: auto;
+  word-wrap: break-word;
 }
-.table th,.table td{
-  border-bottom:1px solid #222a3c;
-  padding:4px 6px;
-  white-space:normal;
-  text-align:center;
+.table th, .table td {
+  text-align: center;
+  white-space: normal;
+  padding: 4px 5px;
 }
 .table th{
   position:sticky;
@@ -1437,13 +1438,17 @@ function pintarTablaDesdeCache(){
 
     // ✅ Validaciones de campos requeridos para habilitar "Receta"
     const tieneVelocidades =
-      reg.vPrensa && reg.vPuller &&
-      reg.vPrensa !== "" && reg.vPuller !== "";
-    const tieneTemperaturas =
-      reg.temp && reg.tempMatriz && reg.tempCont &&
-      reg.temp !== "" && reg.tempMatriz !== "" && reg.tempCont !== "";
+  reg.vPrensa && reg.vPuller &&
+  reg.vPrensa !== "" && reg.vPuller !== "";
+const tieneTemperaturas =
+  reg.temp && reg.tempMatriz && reg.tempCont &&
+  reg.temp !== "" && reg.tempMatriz !== "" && reg.tempCont !== "";
+const tieneTensionDiam =
+  reg.tension && reg.diamArepas &&
+  reg.tension !== "" && reg.diamArepas !== "";
 
-    const habilitado = (tieneVelocidades && tieneTemperaturas);
+const habilitado = (tieneVelocidades && tieneTemperaturas && tieneTensionDiam);
+
 
     const botonReceta = habilitado
       ? `<button class="mini-btn mini-prop" data-prop="${reg.id}" data-f="${reg.fechaKey}">Receta</button>`
@@ -1619,6 +1624,20 @@ async function proponerComoReceta(reg){
   }
 }
 
+// 🔔 Notificación al coordinador (entrada visible en solicitudes)
+try {
+  const noti = {
+    title: "Nueva propuesta de receta",
+    body: `Matriz ${reg.matrizRef || "?"} · Copia ${reg.copiaNo || "-"} · ${reg.prensa || ""}`,
+    timestamp: new Date().toISOString(),
+    tipo: "solicitud_receta"
+  };
+  await push(ref(db, "erp_prensas/notificaciones"), noti);
+} catch(e){
+  console.warn("No se pudo registrar notificación:", e);
+}
+
+
 // Toast pequeño abajo a la derecha para esta acción
 function mostrarToastReceta(msg){
   const id = "toastReceta";
@@ -1768,6 +1787,8 @@ function descargarXlsxFiltrado(){
 </script>
 </body>
 </html>
+
+
 
 
 
