@@ -585,11 +585,11 @@ h1,h2,h3{font-weight:500;}
 
         <div class="field-row-3">
   <div>
-    <label>Tensión (N)</label>
+    <label>Tensión</label>
     <input type="number" id="inpTension" placeholder="Tensión" />
   </div>
   <div>
-    <label>Diámetro de Arepas (mm)</label>
+    <label>Diámetro de Arepas</label>
     <input type="number" id="inpDiamArepas" placeholder="Diámetro" />
   </div>
 </div>
@@ -1063,11 +1063,42 @@ async function cargarCatalogos(){
   // Motivos base (puedes completar con los de tu imagen)
   const motivosBase = [
     // Ejemplos – ajusta los códigos/descrp. según tu Excel
-    {codigo:"001", descripcion:"Cambio matriz"},
-    {codigo:"002", descripcion:"Mantenimiento programado"},
-    {codigo:"003", descripcion:"Daño mecánico"},
-    {codigo:"004", descripcion:"Falta de material"},
-    {codigo:"005", descripcion:"Ajuste de parámetros"}
+    {codigo:"005", descripcion:"HONGO EN CONTENEDOR "},
+{codigo:"006", descripcion:"DAÑO EN CONTAINER"},
+{codigo:"007", descripcion:"PÉRDIDA DE CICLO"},
+{codigo:"008", descripcion:"SE APAGAN BOMBAS "},
+{codigo:"009", descripcion:"MTTO PREVENTIVO"},
+{codigo:"010", descripcion:"FUGA DE ACEITE POR EL CILINDRO"},
+{codigo:"011", descripcion:"DAÑO CILINDRO EMPUJA TOCHOS"},
+{codigo:"012", descripcion:"DAÑO EN SISTEMA PULLERS"},
+{codigo:"013", descripcion:"DAÑO HORNO DE TOCHOS"},
+{codigo:"014", descripcion:"DAÑO ELÉCTRICO EN PRENSA"},
+{codigo:"015", descripcion:"LIMPIEZA DE BOCA CONTENEDOR "},
+{codigo:"016", descripcion:"CIZALLA AVERIADA"},
+{codigo:"017", descripcion:"CILINDRO EXPULSOR AVERIADO "},
+{codigo:"018", descripcion:"PROBLEMAS EN EL CARRO CARGADOR "},
+{codigo:"019", descripcion:"FALLA BOMBA AUTOMÁTICA "},
+{codigo:"020", descripcion:"ELECTRO VÁLVULA TAPADA "},
+{codigo:"021", descripcion:"DAÑO HORNO DE TOCHOS "},
+{codigo:"022", descripcion:"CAMBIO DE DUMMY"},
+{codigo:"023", descripcion:"MESA LLENA"},
+{codigo:"024", descripcion:"PARADA BUTTKNOCKER"},
+{codigo:"025", descripcion:"DAÑO EN CARRO CARGADOR "},
+{codigo:"026", descripcion:"ALINEACIÓN PRENSA"},
+{codigo:"027", descripcion:"MATRIZ RAYADA"},
+{codigo:"028", descripcion:"CEPILLADO"},
+{codigo:"029", descripcion:"VENA"},
+{codigo:"030", descripcion:"DIMENSIONAMIENTO"},
+{codigo:"031", descripcion:"MARCA DE BANDA"},
+{codigo:"032", descripcion:"RASGADA"},
+{codigo:"033", descripcion:"ONDULADA"},
+{codigo:"034", descripcion:"IMPUREZA"},
+{codigo:"035", descripcion:"CONVEXA"},
+{codigo:"036", descripcion:"CONCAVA"},
+{codigo:"037", descripcion:"CERRADA"},
+{codigo:"038", descripcion:"PUNTAS DESIGUALES"},
+{codigo:"039", descripcion:"TAPADA"},
+{codigo:"040", descripcion:"SOBRE ESTIRADA"}
   ];
   motivosBase.forEach(m=>{
     const o = document.createElement("option");
@@ -1737,6 +1768,7 @@ function descargarXlsxFiltrado(){
 </script>
 </body>
 </html>
+
 
 
 
