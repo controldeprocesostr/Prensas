@@ -585,11 +585,11 @@ h1,h2,h3{font-weight:500;}
 
         <div class="field-row-3">
   <div>
-    <label>Tensión</label>
+    <label>Tensión (N)</label>
     <input type="number" id="inpTension" placeholder="Tensión" />
   </div>
   <div>
-    <label>Diámetro de Arepas</label>
+    <label>Diámetro de Arepas (mm)</label>
     <input type="number" id="inpDiamArepas" placeholder="Diámetro" />
   </div>
 </div>
@@ -683,6 +683,8 @@ h1,h2,h3{font-weight:500;}
               <th>Temp Tocho</th>
               <th>Temp Matriz</th>
               <th>Temp Cont.</th>
+              <th>Tensión</th>
+              <th>Ø Arepas</th>
               <th>Cant.</th>
               <th>Peso</th>
               <th>Motivo</th>
@@ -1238,9 +1240,9 @@ async function validarContraReceta(data){
   if(!data.matrizRef) return;
 
   try{
-    const copiaKey = data.copiaNo ? `_${data.copiaNo}` : "_base";
-    const recetaPath = `erp_prensas/recetas/${matrizKey(data.matrizRef)}${copiaKey}`;
-    const snap = await get(ref(db, recetaPath));
+    // 🔹 Clave unificada por matriz + copia
+    const recetaKey = `${matrizKey(data.matrizRef)}_${data.copiaNo || "base"}`;
+    const snap = await get(ref(db, "erp_prensas/recetas/" + recetaKey));
     if(!snap.exists()) return;
 
     const r = snap.val();
@@ -1445,6 +1447,8 @@ function pintarTablaDesdeCache(){
       <td>${reg.temp||""}</td>
       <td>${reg.tempMatriz||""}</td>
       <td>${reg.tempCont||""}</td>
+      <td>${reg.tension ?? ""}</td>
+      <td>${reg.diamArepas ?? ""}</td>
       <td>${reg.cantTochos||""}</td>
       <td>${reg.pesoBrutoKg||""}</td>
       <td>${motivoTxt}</td>
@@ -1559,12 +1563,15 @@ async function proponerComoReceta(reg){
     supervisor:  reg.supervisor || "",
     reporteId:   reg.id,          // vínculo al registro original
     parametros: {
-      vPrensa:       reg.vPrensa ?? null,
-      vPuller:       reg.vPuller ?? null,
-      tempTocho:     reg.temp ?? null,
-      tempMatriz:    reg.tempMatriz ?? null,
-      tempContenedor:reg.tempCont ?? null
-    },
+  vPrensa:        reg.vPrensa ?? null,
+  vPuller:        reg.vPuller ?? null,
+  tempTocho:      reg.temp ?? null,
+  tempMatriz:     reg.tempMatriz ?? null,
+  tempContenedor: reg.tempCont ?? null,
+  tension:        reg.tension ?? null,
+  diamArepas:     reg.diamArepas ?? null
+},
+
     estado:      "pendiente",
     creadoPor:   correoActual,
     creadoEn:    new Date().toISOString()
@@ -1627,14 +1634,16 @@ function descargarXlsxFiltrado(){
   const turno      = first.turno || "";
 
   const headers = [
-    "N°","SO-ITEM","CLIENTE","MATRIZ REF.","COPIA No.",
-    "H.INICIAL","H.FINAL",
-    "VEL. PRENSA MM/SEG","VEL. PULLER MM/SEG",
-    "ROMPIMIENTO (BAR)","TRABAJO (BAR)","PRESIÓN SELLADO (BAR)",
-    "ALEACIÓN","TIPO","LONG. (mm)","COLADA",
-    "TEMP MATRIZ (°C)","TEMP CONTENEDOR (°C)","TEMP TOCHO (°C)",
-    "CANT. TOCHOS","PESO BRUTO (kg)","CÓDIGO MOTIVO"
-  ];
+  "N°","SO-ITEM","CLIENTE","MATRIZ REF.","COPIA No.",
+  "TENSIÓN (N)","Ø AREPAS (mm)",
+  "H.INICIAL","H.FINAL",
+  "VEL. PRENSA MM/SEG","VEL. PULLER MM/SEG",
+  "ROMPIMIENTO (BAR)","TRABAJO (BAR)","PRESIÓN SELLADO (BAR)",
+  "ALEACIÓN","TIPO","LONG. (mm)","COLADA",
+  "TEMP MATRIZ (°C)","TEMP CONTENEDOR (°C)","TEMP TOCHO (°C)",
+  "CANT. TOCHOS","PESO BRUTO (kg)","CÓDIGO MOTIVO"
+];
+
 
   const aoa = [];
 
@@ -1659,6 +1668,10 @@ function descargarXlsxFiltrado(){
       r.cliente || "",
       r.matrizRef || "",
       r.copiaNo || "",
+      r.copiaNo || "",
+      r.tension ?? "",
+      r.diamArepas ?? "",
+      r.hIni || "",
       r.hIni || "",
       r.hFin || "",
       r.vPrensa ?? "",
@@ -1724,6 +1737,8 @@ function descargarXlsxFiltrado(){
 </script>
 </body>
 </html>
+
+
 
 
 
