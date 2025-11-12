@@ -808,22 +808,23 @@ async function cargarAlertas() {
     filtradas.forEach(a => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-  <td>${a.fecha || ""}</td>
-  <td>${a.prensa || ""}</td>
-  <td>${a.matrizRef || ""}</td>
-  <td>${a.vPrensa ?? ""}</td>
-  <td>${a.vPuller ?? ""}</td>
-  <td>${a.temp ?? ""}</td>
-  <td>${a.tempMatriz ?? ""}</td>
-  <td>${a.tempCont ?? ""}</td>
-  <td>${a.copiaNo ?? ""}</td>
-<td>${a.tensionMin ?? ""}</td>
-<td>${a.diamArepasMin ?? ""}</td>
-  <td>${a.motivoDesc || a.motivoCod || ""}</td>
-  <td>${a.descripcion || ""}</td>
-  <td>${a.createdBy || ""}</td>
-  <td>${a.createdAt ? a.createdAt.replace("T"," ").slice(0,19) : ""}</td>
+  <td>${a.fecha||""}</td>
+  <td>${a.prensa||""}</td>
+  <td>${a.matrizRef||""}</td>
+  <td>${a.copiaNo??""}</td>
+  <td>${a.vPrensa??""}</td>
+  <td>${a.vPuller??""}</td>
+  <td>${a.temp??""}</td>
+  <td>${a.tempMatriz??""}</td>
+  <td>${a.tempCont??""}</td>
+  <td>${a.tension??""}</td>
+  <td>${a.diamArepas??""}</td>
+  <td>${a.motivoDesc||a.motivoCod||""}</td>
+  <td>${a.descripcion||""}</td>
+  <td>${a.createdBy||""}</td>
+  <td>${a.createdAt?.replace("T"," ").slice(0,19)||""}</td>
 `;
+
 
       tbody.appendChild(tr);
     });
@@ -859,19 +860,19 @@ async function cargarSolicitudesRecetas(){
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${s.fecha||""}</td>
-        <td>${s.prensa||""}</td>
-        <td>${s.matrizRef||""}</td>
-        <td>${s.operador||""}</td>
-        <td>${s.supervisor||""}</td>
-        <td>${s.parametros?.vPrensa??""}</td>
-        <td>${s.parametros?.vPuller??""}</td>
-        <td>${s.parametros?.tempTocho??""}</td>
-        <td>${s.parametros?.tempMatriz??""}</td>
-        <td>${s.parametros?.tempContenedor??""}</td>
-        <td>${s.copiaNo ?? ""}</td>
-<td>${s.parametros?.tension ?? ""}</td>
-<td>${s.parametros?.diamArepas ?? ""}</td>
+  <td>${s.fecha||""}</td>
+  <td>${s.prensa||""}</td>
+  <td>${s.matrizRef||""}</td>
+  <td>${s.copiaNo||""}</td>
+  <td>${s.operador||""}</td>
+  <td>${s.supervisor||""}</td>
+  <td>${s.parametros?.vPrensa??""}</td>
+  <td>${s.parametros?.vPuller??""}</td>
+  <td>${s.parametros?.tempTocho??""}</td>
+  <td>${s.parametros?.tempMatriz??""}</td>
+  <td>${s.parametros?.tempContenedor??""}</td>
+  <td>${s.parametros?.tension??""}</td>
+  <td>${s.parametros?.diamArepas??""}</td>
 
         <td style="color:${colorEstado};font-weight:600;">${s.estado||"pendiente"}</td>
         <td>
@@ -961,11 +962,14 @@ async function rechazarSolicitud(key){
 $("#btnVerHistorial").addEventListener("click", async()=>{
   const matriz = $("#histMatriz").value.trim();
   const tbody = $("#tblHistorial tbody");
+  $("#btnVerHistorial").textContent = `Ver historial (${matriz} - ${copia})`;
   tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Cargando...</td></tr>`;
   if(!matriz){ alert("Ingresa un código de matriz."); return; }
 
   try{
-    const snap = await get(ref(db, "erp_prensas/recetas_log/" + `${matrizKey(matriz)}_${$("#copiaNo").value || "base"}`));
+    const copia = $("#copiaNo").value.trim() || "base";
+const snap = await get(ref(db, `erp_prensas/recetas_log/${matrizKey(matriz)}_${copia}`));
+
 
     if(!snap.exists()){
       tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Sin historial registrado</td></tr>`;
@@ -1116,6 +1120,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
