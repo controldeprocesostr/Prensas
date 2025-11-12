@@ -394,7 +394,6 @@ h1,h2,h3{font-weight:500;}
     justify-content:flex-end;
   }
 }
-    
 </style>
 </head>
 <body>
@@ -583,6 +582,18 @@ h1,h2,h3{font-weight:500;}
             </div>
           </div>
         </div>
+
+        <div class="field-row-3">
+  <div>
+    <label>Tensión (N)</label>
+    <input type="number" id="inpTension" placeholder="Tensión" />
+  </div>
+  <div>
+    <label>Diámetro de Arepas (mm)</label>
+    <input type="number" id="inpDiamArepas" placeholder="Diámetro" />
+  </div>
+</div>
+
 
         <!-- Motivo parada -->
         <div class="card col-span-3">
@@ -1050,43 +1061,11 @@ async function cargarCatalogos(){
   // Motivos base (puedes completar con los de tu imagen)
   const motivosBase = [
     // Ejemplos – ajusta los códigos/descrp. según tu Excel
-    {codigo:"005", descripcion:"HONGO EN CONTENEDOR "},
-{codigo:"006", descripcion:"DAÑO EN CONTAINER"},
-{codigo:"007", descripcion:"PÉRDIDA DE CICLO"},
-{codigo:"008", descripcion:"SE APAGAN BOMBAS "},
-{codigo:"009", descripcion:"MTTO PREVENTIVO"},
-{codigo:"010", descripcion:"FUGA DE ACEITE POR EL CILINDRO"},
-{codigo:"011", descripcion:"DAÑO CILINDRO EMPUJA TOCHOS"},
-{codigo:"012", descripcion:"DAÑO EN SISTEMA PULLERS"},
-{codigo:"013", descripcion:"DAÑO HORNO DE TOCHOS"},
-{codigo:"014", descripcion:"DAÑO ELÉCTRICO EN PRENSA"},
-{codigo:"015", descripcion:"LIMPIEZA DE BOCA CONTENEDOR "},
-{codigo:"016", descripcion:"CIZALLA AVERIADA"},
-{codigo:"017", descripcion:"CILINDRO EXPULSOR AVERIADO "},
-{codigo:"018", descripcion:"PROBLEMAS EN EL CARRO CARGADOR "},
-{codigo:"019", descripcion:"FALLA BOMBA AUTOMÁTICA "},
-{codigo:"020", descripcion:"ELECTRO VÁLVULA TAPADA "},
-{codigo:"021", descripcion:"DAÑO HORNO DE TOCHOS "},
-{codigo:"022", descripcion:"CAMBIO DE DUMMY"},
-{codigo:"023", descripcion:"MESA LLENA"},
-{codigo:"024", descripcion:"PARADA BUTTKNOCKER"},
-{codigo:"025", descripcion:"DAÑO EN CARRO CARGADOR "},
-{codigo:"026", descripcion:"ALINEACIÓN PRENSA"},
-{codigo:"027", descripcion:"MATRIZ RAYADA"},
-{codigo:"028", descripcion:"CEPILLADO"},
-{codigo:"029", descripcion:"VENA"},
-{codigo:"030", descripcion:"DIMENSIONAMIENTO"},
-{codigo:"031", descripcion:"MARCA DE BANDA"},
-{codigo:"032", descripcion:"RASGADA"},
-{codigo:"033", descripcion:"ONDULADA"},
-{codigo:"034", descripcion:"IMPUREZA"},
-{codigo:"035", descripcion:"CONVEXA"},
-{codigo:"036", descripcion:"CONCAVA"},
-{codigo:"037", descripcion:"CERRADA"},
-{codigo:"038", descripcion:"PUNTAS DESIGUALES"},
-{codigo:"039", descripcion:"TAPADA"},
-{codigo:"040", descripcion:"SOBRE ESTIRADA"}
-
+    {codigo:"001", descripcion:"Cambio matriz"},
+    {codigo:"002", descripcion:"Mantenimiento programado"},
+    {codigo:"003", descripcion:"Daño mecánico"},
+    {codigo:"004", descripcion:"Falta de material"},
+    {codigo:"005", descripcion:"Ajuste de parámetros"}
   ];
   motivosBase.forEach(m=>{
     const o = document.createElement("option");
@@ -1209,6 +1188,9 @@ async function guardarRegistro(){
     temp:         Number($("#inpTemp").value || 0),
     cantTochos:   Number($("#inpCant").value || 0),
 
+    tension: Number($("#inpTension").value || 0),
+    diamArepas: Number($("#inpDiamArepas").value || 0),
+
     motivoCod:    $("#selMotivo").value || "",
     motivoDesc:   $("#selMotivo").selectedOptions[0]?.textContent || "",
     obs:          $("#inpObs").value,
@@ -1256,7 +1238,9 @@ async function validarContraReceta(data){
   if(!data.matrizRef) return;
 
   try{
-    const snap = await get(ref(db, "erp_prensas/recetas/" + matrizKey(data.matrizRef)));
+    const copiaKey = data.copiaNo ? `_${data.copiaNo}` : "_base";
+    const recetaPath = `erp_prensas/recetas/${matrizKey(data.matrizRef)}${copiaKey}`;
+    const snap = await get(ref(db, recetaPath));
     if(!snap.exists()) return;
 
     const r = snap.val();
@@ -1264,49 +1248,54 @@ async function validarContraReceta(data){
 
     const vP  = data.vPrensa;
     const vU  = data.vPuller;
-    const tT  = data.temp;        // Temp tocho
-    const tM  = data.tempMatriz;  // 🔹 Temp matriz
-    const tC  = data.tempCont;    // 🔹 Temp contenedor
+    const tT  = data.temp;
+    const tM  = data.tempMatriz;
+    const tC  = data.tempCont;
+    const pR  = data.pRomp;
+    const pT  = data.pTrab;
+    const pS  = data.pSell;
+    const ten = data.tension;
+    const dia = data.diamArepas;
 
-    // Velocidad prensa
-    if(r.vPrensaMin!=null && vP && vP < r.vPrensaMin) desviaciones.push(`V.Prensa por debajo (${vP} < ${r.vPrensaMin})`);
-    if(r.vPrensaMax!=null && vP && vP > r.vPrensaMax) desviaciones.push(`V.Prensa por encima (${vP} > ${r.vPrensaMax})`);
+    // === Velocidades ===
+    if(r.vPrensaMin!=null && vP < r.vPrensaMin) desviaciones.push(`Vel. prensa baja (${vP} < ${r.vPrensaMin})`);
+    if(r.vPrensaMax!=null && vP > r.vPrensaMax) desviaciones.push(`Vel. prensa alta (${vP} > ${r.vPrensaMax})`);
+    if(r.vPullerMin!=null && vU < r.vPullerMin) desviaciones.push(`Vel. puller baja (${vU} < ${r.vPullerMin})`);
+    if(r.vPullerMax!=null && vU > r.vPullerMax) desviaciones.push(`Vel. puller alta (${vU} > ${r.vPullerMax})`);
 
-    // Velocidad puller
-    if(r.vPullerMin!=null && vU && vU < r.vPullerMin) desviaciones.push(`V.Puller por debajo (${vU} < ${r.vPullerMin})`);
-    if(r.vPullerMax!=null && vU && vU > r.vPullerMax) desviaciones.push(`V.Puller por encima (${vU} > ${r.vPullerMax})`);
+    // === Temperaturas ===
+    if(r.tempMin!=null && tT < r.tempMin) desviaciones.push(`Temp. tocho baja (${tT} < ${r.tempMin})`);
+    if(r.tempMax!=null && tT > r.tempMax) desviaciones.push(`Temp. tocho alta (${tT} > ${r.tempMax})`);
+    if(r.tempMatrizMin!=null && tM < r.tempMatrizMin) desviaciones.push(`Temp. matriz baja (${tM} < ${r.tempMatrizMin})`);
+    if(r.tempMatrizMax!=null && tM > r.tempMatrizMax) desviaciones.push(`Temp. matriz alta (${tM} > ${r.tempMatrizMax})`);
+    if(r.tempContMin!=null && tC < r.tempContMin) desviaciones.push(`Temp. contenedor baja (${tC} < ${r.tempContMin})`);
+    if(r.tempContMax!=null && tC > r.tempContMax) desviaciones.push(`Temp. contenedor alta (${tC} > ${r.tempContMax})`);
 
-    // Temp tocho
-    if(r.tempMin!=null && tT && tT < r.tempMin)  desviaciones.push(`Temp tocho por debajo (${tT} < ${r.tempMin})`);
-    if(r.tempMax!=null && tT && tT > r.tempMax)  desviaciones.push(`Temp tocho por encima (${tT} > ${r.tempMax})`);
+    // === Presiones ===
+    if(r.pRompMin!=null && pR < r.pRompMin) desviaciones.push(`Presión rompimiento baja (${pR} < ${r.pRompMin})`);
+    if(r.pRompMax!=null && pR > r.pRompMax) desviaciones.push(`Presión rompimiento alta (${pR} > ${r.pRompMax})`);
+    if(r.pTrabMin!=null && pT < r.pTrabMin) desviaciones.push(`Presión trabajo baja (${pT} < ${r.pTrabMin})`);
+    if(r.pTrabMax!=null && pT > r.pTrabMax) desviaciones.push(`Presión trabajo alta (${pT} > ${r.pTrabMax})`);
+    if(r.pSellMin!=null && pS < r.pSellMin) desviaciones.push(`Presión sellado baja (${pS} < ${r.pSellMin})`);
+    if(r.pSellMax!=null && pS > r.pSellMax) desviaciones.push(`Presión sellado alta (${pS} > ${r.pSellMax})`);
 
-    // 🔹 Temp matriz
-    if(r.tempMatrizMin!=null && tM && tM < r.tempMatrizMin) desviaciones.push(`Temp matriz por debajo (${tM} < ${r.tempMatrizMin})`);
-    if(r.tempMatrizMax!=null && tM && tM > r.tempMatrizMax) desviaciones.push(`Temp matriz por encima (${tM} > ${r.tempMatrizMax})`);
-
-    // 🔹 Temp contenedor
-    if(r.tempContMin!=null && tC && tC < r.tempContMin) desviaciones.push(`Temp contenedor por debajo (${tC} < ${r.tempContMin})`);
-    if(r.tempContMax!=null && tC && tC > r.tempContMax) desviaciones.push(`Temp contenedor por encima (${tC} > ${r.tempContMax})`);
+    // === Tensión y Diámetro de Arepas ===
+    if(r.tensionMin!=null && ten < r.tensionMin) desviaciones.push(`Tensión baja (${ten} < ${r.tensionMin})`);
+    if(r.tensionMax!=null && ten > r.tensionMax) desviaciones.push(`Tensión alta (${ten} > ${r.tensionMax})`);
+    if(r.diamArepasMin!=null && dia < r.diamArepasMin) desviaciones.push(`Diám. arepas bajo (${dia} < ${r.diamArepasMin})`);
+    if(r.diamArepasMax!=null && dia > r.diamArepasMax) desviaciones.push(`Diám. arepas alto (${dia} > ${r.diamArepasMax})`);
 
     if(desviaciones.length){
       const alerta = {
-        fecha:      data.fecha,
-        prensa:     data.prensa,
-        matrizRef:  data.matrizRef,
-        vPrensa:    data.vPrensa,
-        vPuller:    data.vPuller,
-        temp:       data.temp,        // Tocho
-        tempMatriz: data.tempMatriz,  // 🔹
-        tempCont:   data.tempCont,    // 🔹
-        motivoCod:  data.motivoCod,
-        motivoDesc: data.motivoDesc,
+        fecha: data.fecha,
+        prensa: data.prensa,
+        matrizRef: data.matrizRef,
+        copiaNo: data.copiaNo,
         descripcion: desviaciones.join("; "),
-        createdBy:  data.createdBy,
-        createdAt:  new Date().toISOString()
+        creadoPor: data.createdBy,
+        createdAt: new Date().toISOString()
       };
-
-      await push(ref(db,"erp_prensas/alertas"), alerta);
-
+      await push(ref(db, "erp_prensas/alertas"), alerta);
       reproducirSonidoAlerta();
       mostrarToastAlerta(alerta.descripcion);
     }
@@ -1735,6 +1724,8 @@ function descargarXlsxFiltrado(){
 </script>
 </body>
 </html>
+
+
 
 
 
