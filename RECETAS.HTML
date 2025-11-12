@@ -73,7 +73,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 .small{font-size:11px;color:var(--muted);}
 
 .table{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px;}
-.table th,.table td{border-bottom:1px solid #222a3c;padding:4px 6px;white-space:nowrap;}
+.table th, .table td {
+  border-bottom: 1px solid #222a3c;
+  padding: 6px 8px;
+  white-space: nowrap;
+  text-align: center;       /* 🔹 Centra todo el contenido */
+  vertical-align: middle;   /* 🔹 Centra verticalmente también */
+}
+
+
 .table th{
   background:#050b17;position:sticky;top:0;
   color:#cfe6ff;font-weight:600;
@@ -249,19 +257,22 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
         <h3 style="margin-top:10px;font-size:13px;">Recetas registradas</h3>
         <div style="max-height:260px;overflow:auto;margin-top:4px;">
           <table class="table" id="tblRecetas">
-            <thead>
-              <tr>
-  <th>Editar</th>
-  <th>Matriz</th><th>Descripción</th>
-  <th>V.P min</th><th>V.P max</th>
-  <th>V.U min</th><th>V.U max</th>
-  <th>T tocho min</th><th>T tocho max</th>
-  <th>T matriz min</th><th>T matriz max</th>
-  <th>T cont. min</th><th>T cont. max</th>
-  <th>Actualizado por</th>
-</tr>
+  <thead>
+    <tr>
+      <th>Editar</th>
+      <th>Matriz</th><th>Descripción</th>
+      <th>V.P min</th><th>V.P max</th>
+      <th>V.U min</th><th>V.U max</th>
+      <th>T tocho min</th><th>T tocho max</th>
+      <th>T matriz min</th><th>T matriz max</th>
+      <th>T cont. min</th><th>T cont. max</th>
+      <th>Tensión min</th><th>Tensión max</th>
+      <th>Ø Arepas min</th><th>Ø Arepas max</th>
+      <th>Copia</th>
+      <th>Actualizado por</th>
+    </tr>
+  </thead>
 
-            </thead>
             <tbody></tbody>
           </table>
         </div>
@@ -538,6 +549,7 @@ function initRecetas(){
       Object.entries(val).forEach(([key,r])=>{
         const tr=document.createElement("tr");
         tr.innerHTML = `
+  tr.innerHTML = `
   <td><button class="btn btn-outline" style="padding:3px 8px;font-size:10px;" data-m="${key}">Editar</button></td>
   <td>${r.matrizRef||""}</td>
   <td>${r.descripcion||""}</td>
@@ -551,8 +563,14 @@ function initRecetas(){
   <td>${r.tempMatrizMax??""}</td>
   <td>${r.tempContMin??""}</td>
   <td>${r.tempContMax??""}</td>
+  <td>${r.tensionMin??""}</td>
+  <td>${r.tensionMax??""}</td>
+  <td>${r.diamArepasMin??""}</td>
+  <td>${r.diamArepasMax??""}</td>
+  <td>${r.copiaNo??""}</td>
   <td>${r.updatedBy||r.createdBy||""}</td>
 `;
+
 
         tbody.appendChild(tr);
       });
@@ -582,6 +600,11 @@ function cargarRecetaEnFormulario(r){
   $("#rcTMatrizMax").value = r.tempMatrizMax ?? "";
   $("#rcTContMin").value   = r.tempContMin ?? "";
   $("#rcTContMax").value   = r.tempContMax ?? "";
+  $("#tensionMin").value = r.tensionMin ?? "";
+$("#tensionMax").value = r.tensionMax ?? "";
+$("#diamArepasMin").value = r.diamArepasMin ?? "";
+$("#diamArepasMax").value = r.diamArepasMax ?? "";
+$("#copiaNo").value = r.copiaNo ?? "";
 
 }
 
@@ -871,22 +894,28 @@ async function aprobarSolicitud(key){
 
   // Crear o actualizar receta (todas las temperaturas y velocidades)
   const receta = {
-    matrizRef: s.matrizRef,
-    descripcion: s.matrizRef,
-    comentario: "Receta aprobada desde solicitud",
-    vPrensaMin: s.parametros.vPrensa ?? null,
-    vPrensaMax: s.parametros.vPrensa ?? null,
-    vPullerMin: s.parametros.vPuller ?? null,
-    vPullerMax: s.parametros.vPuller ?? null,
-    tempMin: s.parametros.tempTocho ?? null,
-    tempMax: s.parametros.tempTocho ?? null,
-    tempMatrizMin: s.parametros.tempMatriz ?? null,
-    tempMatrizMax: s.parametros.tempMatriz ?? null,
-    tempContMin: s.parametros.tempContenedor ?? null,
-    tempContMax: s.parametros.tempContenedor ?? null,
-    updatedBy: auth.currentUser?.email || "sistema",
-    updatedAt: new Date().toISOString()
-  };
+  matrizRef: s.matrizRef,
+  descripcion: s.matrizRef,
+  comentario: "Receta aprobada desde solicitud",
+  vPrensaMin: s.parametros.vPrensa ?? null,
+  vPrensaMax: s.parametros.vPrensa ?? null,
+  vPullerMin: s.parametros.vPuller ?? null,
+  vPullerMax: s.parametros.vPuller ?? null,
+  tempMin: s.parametros.tempTocho ?? null,
+  tempMax: s.parametros.tempTocho ?? null,
+  tempMatrizMin: s.parametros.tempMatriz ?? null,
+  tempMatrizMax: s.parametros.tempMatriz ?? null,
+  tempContMin: s.parametros.tempContenedor ?? null,
+  tempContMax: s.parametros.tempContenedor ?? null,
+  tensionMin: s.parametros.tension ?? null,
+  tensionMax: s.parametros.tension ?? null,
+  diamArepasMin: s.parametros.diamArepas ?? null,
+  diamArepasMax: s.parametros.diamArepas ?? null,
+  copiaNo: s.copiaNo ?? null,
+  updatedBy: auth.currentUser?.email || "sistema",
+  updatedAt: new Date().toISOString()
+};
+
 
   await set(ref(db, "erp_prensas/recetas/" + matrizKey(s.matrizRef)), receta);
   await set(ref(db, "erp_prensas/solicitudes_recetas/" + key + "/estado"), "aprobado");
@@ -1066,6 +1095,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
