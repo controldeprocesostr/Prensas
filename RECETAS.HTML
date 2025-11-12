@@ -268,7 +268,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
       <th>T cont. min</th><th>T cont. max</th>
       <th>Tensión min</th><th>Tensión max</th>
       <th>Ø Arepas min</th><th>Ø Arepas max</th>
-      <th>Copia</th>
+      <th>CopiaNo</th>
       <th>Actualizado por</th>
     </tr>
   </thead>
@@ -344,12 +344,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
           <table class="table" id="tblAlertas">
             <thead>
   <tr>
-    <th>Fecha</th><th>Prensa</th><th>Matriz</th>
+    <th>Fecha</th><th>Prensa</th><th>Matriz</th><th>Copia</th>
     <th>V.Prensa</th><th>V.Puller</th>
     <th>Temp tocho</th><th>Temp matriz</th><th>Temp cont.</th>
+    <th>Tensión</th><th>Ø Arepas</th>
     <th>Motivo</th><th>Descripción alerta</th><th>Usuario</th><th>Fecha registro</th>
   </tr>
 </thead>
+
 
             <tbody></tbody>
           </table>
@@ -372,13 +374,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
     <div style="max-height:320px;overflow:auto;margin-top:6px;">
       <table class="table" id="tblSolicitudes">
         <thead>
-          <tr>
-            <th>Fecha</th><th>Prensa</th><th>Matriz</th><th>Operador</th>
-            <th>Supervisor</th><th>V.Prensa</th><th>V.Puller</th>
-            <th>Temp Tocho</th><th>Temp Matriz</th><th>Temp Cont.</th>
-            <th>Estado</th><th>Acciones</th>
-          </tr>
-        </thead>
+  <tr>
+    <th>Fecha</th><th>Prensa</th><th>Matriz</th><th>Copia</th>
+    <th>Operador</th><th>Supervisor</th>
+    <th>V.Prensa</th><th>V.Puller</th>
+    <th>Temp Tocho</th><th>Temp Matriz</th><th>Temp Cont.</th>
+    <th>Tensión</th><th>Ø Arepas</th>
+    <th>Estado</th><th>Acciones</th>
+  </tr>
+</thead>
+
         <tbody></tbody>
       </table>
     </div>
@@ -541,45 +546,48 @@ navButtons.forEach(btn=>{
 /* === RECETAS === */
 
 function initRecetas(){
-  onValue(ref(db,"erp_prensas/recetas"),snap=>{
+  const refRecetas = ref(db,"erp_prensas/recetas");
+  onValue(refRecetas,(snap)=>{
     const tbody = $("#tblRecetas tbody");
     tbody.innerHTML = "";
-    if(snap.exists()){
-      const val = snap.val();
-      Object.entries(val).forEach(([key,r])=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML = `
-          <td><button class="btn btn-outline" style="padding:3px 8px;font-size:10px;" data-m="${key}">Editar</button></td>
-          <td>${r.matrizRef||""}</td>
-          <td>${r.descripcion||""}</td>
-          <td>${r.vPrensaMin??""}</td>
-          <td>${r.vPrensaMax??""}</td>
-          <td>${r.vPullerMin??""}</td>
-          <td>${r.vPullerMax??""}</td>
-          <td>${r.tempMin??""}</td>
-          <td>${r.tempMax??""}</td>
-          <td>${r.tempMatrizMin??""}</td>
-          <td>${r.tempMatrizMax??""}</td>
-          <td>${r.tempContMin??""}</td>
-          <td>${r.tempContMax??""}</td>
-          <td>${r.tensionMin??""}</td>
-          <td>${r.tensionMax??""}</td>
-          <td>${r.diamArepasMin??""}</td>
-          <td>${r.diamArepasMax??""}</td>
-          <td>${r.copiaNo??""}</td>
-          <td>${r.updatedBy||r.createdBy||""}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+    if(!snap.exists()) return;
 
-      tbody.querySelectorAll("button[data-m]").forEach(btn=>{
-        btn.addEventListener("click",()=>{
-          const k = btn.dataset.m;
-          const r = snap.val()[k];
-          cargarRecetaEnFormulario(r);
-        });
+    const val = snap.val();
+    const recetasOrdenadas = Object.entries(val).sort(([a], [b]) => a.localeCompare(b));
+
+    recetasOrdenadas.forEach(([key, r])=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><button class="btn btn-outline" style="padding:3px 8px;font-size:10px;" data-m="${key}">Editar</button></td>
+        <td>${r.matrizRef||""}</td>
+        <td>${r.descripcion||""}</td>
+        <td>${r.vPrensaMin??""}</td>
+        <td>${r.vPrensaMax??""}</td>
+        <td>${r.vPullerMin??""}</td>
+        <td>${r.vPullerMax??""}</td>
+        <td>${r.tempMin??""}</td>
+        <td>${r.tempMax??""}</td>
+        <td>${r.tempMatrizMin??""}</td>
+        <td>${r.tempMatrizMax??""}</td>
+        <td>${r.tempContMin??""}</td>
+        <td>${r.tempContMax??""}</td>
+        <td>${r.tensionMin??""}</td>
+        <td>${r.tensionMax??""}</td>
+        <td>${r.diamArepasMin??""}</td>
+        <td>${r.diamArepasMax??""}</td>
+        <td>${r.copiaNo??""}</td>
+        <td>${r.updatedBy||r.createdBy||""}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll("button[data-m]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const k = btn.dataset.m;
+        const r = snap.val()[k];
+        cargarRecetaEnFormulario(r);
       });
-    }
+    });
   });
 }
 
@@ -626,7 +634,7 @@ $("#btnGuardarReceta").addEventListener("click", async()=>{
 
   // 🔹 Construir clave única usando matriz + copia
   const copia = $("#copiaNo").value.trim() || "base";
-  const recetaKey = matrizKey(matriz) + "_" + copia;
+  const recetaKey = `${matrizKey(matriz)}_${copia || "base"}`;
   const recetaRef = ref(db, "erp_prensas/recetas/" + recetaKey);
   const snapAnterior = await get(recetaRef);
   const anterior = snapAnterior.exists() ? snapAnterior.val() : {};
@@ -671,7 +679,7 @@ $("#btnGuardarReceta").addEventListener("click", async()=>{
 
   // 🔹 Registrar trazabilidad
   const logKey = Date.now();
-  const logRef = ref(db, `erp_prensas/recetas_log/${matrizKey(matriz)}/${logKey}`);
+  const logRef = ref(db, `erp_prensas/recetas_log/${matrizKey(matriz)}_${copia || "base"}/${logKey}`);
   await set(logRef, {
     accion: snapAnterior.exists() ? "actualizacion_manual" : "creacion",
     realizadoPor: user.email,
@@ -808,6 +816,9 @@ async function cargarAlertas() {
   <td>${a.temp ?? ""}</td>
   <td>${a.tempMatriz ?? ""}</td>
   <td>${a.tempCont ?? ""}</td>
+  <td>${a.copiaNo ?? ""}</td>
+<td>${a.tensionMin ?? ""}</td>
+<td>${a.diamArepasMin ?? ""}</td>
   <td>${a.motivoDesc || a.motivoCod || ""}</td>
   <td>${a.descripcion || ""}</td>
   <td>${a.createdBy || ""}</td>
@@ -858,6 +869,10 @@ async function cargarSolicitudesRecetas(){
         <td>${s.parametros?.tempTocho??""}</td>
         <td>${s.parametros?.tempMatriz??""}</td>
         <td>${s.parametros?.tempContenedor??""}</td>
+        <td>${s.copiaNo ?? ""}</td>
+<td>${s.parametros?.tension ?? ""}</td>
+<td>${s.parametros?.diamArepas ?? ""}</td>
+
         <td style="color:${colorEstado};font-weight:600;">${s.estado||"pendiente"}</td>
         <td>
           ${s.estado==="pendiente" ? `
@@ -914,12 +929,15 @@ async function aprobarSolicitud(key){
 };
 
 
-  await set(ref(db, "erp_prensas/recetas/" + matrizKey(s.matrizRef)), receta);
+  const copia = s.copiaNo || "base";
+await set(ref(db, "erp_prensas/recetas/" + `${matrizKey(s.matrizRef)}_${copia}`), receta);
+
   await set(ref(db, "erp_prensas/solicitudes_recetas/" + key + "/estado"), "aprobado");
 
   // 🔹 Guardar log de aprobación
   const logKey = Date.now();
-  const logRef = ref(db, `erp_prensas/recetas_log/${matrizKey(s.matrizRef)}/${logKey}`);
+  const logRef = ref(db, `erp_prensas/recetas_log/${matrizKey(s.matrizRef)}_${s.copiaNo || "base"}/${logKey}`);
+
   await set(logRef, {
     accion: "aprobacion_solicitud",
     realizadoPor: auth.currentUser?.email || "sistema",
@@ -947,7 +965,8 @@ $("#btnVerHistorial").addEventListener("click", async()=>{
   if(!matriz){ alert("Ingresa un código de matriz."); return; }
 
   try{
-    const snap = await get(ref(db, "erp_prensas/recetas_log/" + matrizKey(matriz)));
+    const snap = await get(ref(db, "erp_prensas/recetas_log/" + `${matrizKey(matriz)}_${$("#copiaNo").value || "base"}`));
+
     if(!snap.exists()){
       tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Sin historial registrado</td></tr>`;
       return;
@@ -994,8 +1013,13 @@ onChildAdded(ref(db, "erp_prensas/solicitudes_recetas"), snapshot => {
   // Mostrar notificación visual
   mostrarNotificacionReceta(data);
 
-  // Reproducir sonido de alerta
-  try { sound.play(); } catch(e) { console.warn("Sonido bloqueado por navegador"); }
+  // 🔔 Reproducir sonido y vibración al recibir nueva solicitud
+  try {
+    sound.play();
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  } catch (e) {
+    console.warn("Sonido bloqueado por navegador");
+  }
 });
 
 function mostrarNotificacionReceta(data){
@@ -1005,6 +1029,7 @@ function mostrarNotificacionReceta(data){
     <div class="toast-title">📨 Nueva propuesta de receta</div>
     <div class="toast-body">
       <b>Matriz:</b> ${data.matrizRef || "N/A"}<br>
+      <b>Copia:</b> ${data.copiaNo || "-"}<br>
       <b>Prensa:</b> ${data.prensa || "?"} — <b>Supervisor:</b> ${data.supervisor || "?"}
     </div>
     <div class="toast-actions">
@@ -1026,7 +1051,6 @@ function mostrarNotificacionReceta(data){
 
   setTimeout(() => toast.remove(), 15000);
 }
-
 
 /* === BANNERS FLOTANTES DE ALERTA (tiempo real) === */
 async function initAlertToast(){
@@ -1092,6 +1116,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
