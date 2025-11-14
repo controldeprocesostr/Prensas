@@ -585,14 +585,21 @@ function initRecetas(){
 
     tbody.querySelectorAll("button[data-m]").forEach(btn=>{
   btn.addEventListener("click",()=>{
-
-    recetaSeleccionadaKey = btn.dataset.m;   // ← CLAVE REAL GUARDADA
+    recetaSeleccionadaKey = btn.dataset.m;
 
     const r = snap.val()[recetaSeleccionadaKey];
-    cargarRecetaEnFormulario(r);
+    
+    // 🔥 EXTRAER LA COPIA desde la KEY
+    const partes = recetaSeleccionadaKey.split("_");
+    const copiaDetectada = partes[1] || "base";
+
+    cargarRecetaEnFormulario({
+      ...r,
+      copiaNo: copiaDetectada    // ← SE ASEGURA QUE EL CAMPO SE LLENE
+    });
   });
 });
-  });
+
 }
 
 function cargarRecetaEnFormulario(r){
@@ -643,10 +650,13 @@ $("#btnGuardarReceta").addEventListener("click", async()=>{
   let copia = $("#copiaNo").value.trim() || "base";
 
 // Si estoy EDITANDO una receta existente
-let recetaKey = recetaSeleccionadaKey;
+let recetaKey;
 
-// Si estoy creando una receta nueva
-if (!recetaKey) {
+// 🟢 Siempre construir clave con matriz + copia
+if (recetaSeleccionadaKey) {
+  // Si estoy editando, siempre reconstruyo la clave correctamente
+  recetaKey = `${matrizKey(matriz)}_${copia}`;
+} else {
   recetaKey = `${matrizKey(matriz)}_${copia}`;
 }
 
@@ -1196,6 +1206,7 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
 
 
 
