@@ -671,7 +671,6 @@ const recetaRef = ref(db, "erp_prensas/recetas/" + recetaKey);
     tempContMax: numOrNull($("#rcTContMax").value),
     updatedBy: user.email,
     updatedAt: new Date().toISOString(),
-
     tensionMin: Number($("#tensionMin").value || 0),
     tensionMax: Number($("#tensionMax").value || 0),
     diamArepasMin: Number($("#diamArepasMin").value || 0),
@@ -875,46 +874,50 @@ async function cargarSolicitudesRecetas(){
                           s.estado==="rechazado" ? "#ff4b6a" : "#ffae00";
 
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-  <td>${s.fecha||""}</td>
-  <td>${s.prensa||""}</td>
-  <td>${s.matrizRef||""}</td>
-  <td>${s.copiaNo||""}</td>
-  <td>${s.operador||""}</td>
-  <td>${s.supervisor||""}</td>
-  <td>${s.parametros?.vPrensa??""}</td>
-  <td>${s.parametros?.vPuller??""}</td>
-  <td>${s.parametros?.tempTocho??""}</td>
-  <td>${s.parametros?.tempMatriz??""}</td>
-  <td>${s.parametros?.tempContenedor??""}</td>
-  <td>${s.parametros?.tension??""}</td>
-  <td>${s.parametros?.diamArepas ?? ""}</td>
+      tbody.innerHTML = "";
 
+datos.forEach(s=>{
+  const colorEstado =
+    s.estado === "aprobado" ? "#16c784" :
+    s.estado === "rechazado" ? "#ff4b6a" :
+    "#ffae00";
 
-        <td style="color:${colorEstado};font-weight:600;">${s.estado||"pendiente"}</td>
-        <td>
-          ${s.estado==="pendiente" ? `
-            <button class="btn btn-primary btn-mini" data-aprobar="${s.key}">Aprobar</button>
-            <button class="btn btn-outline btn-mini" data-rechazar="${s.key}">Rechazar</button>
-          ` : "-"}
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${s.fecha||""}</td>
+    <td>${s.prensa||""}</td>
+    <td>${s.matrizRef||""}</td>
+    <td>${s.copiaNo || "-"}</td>
+    <td>${s.operador||""}</td>
+    <td>${s.supervisor||""}</td>
+    <td>${s.parametros?.vPrensa??""}</td>
+    <td>${s.parametros?.vPuller??""}</td>
+    <td>${s.parametros?.tempTocho??""}</td>
+    <td>${s.parametros?.tempMatriz??""}</td>
+    <td>${s.parametros?.tempContenedor??""}</td>
+    <td>${s.parametros?.tension??""}</td>
+    <td>${s.parametros?.diamArepas ?? ""}</td>
+    <td style="color:${colorEstado};font-weight:600;">${s.estado||"pendiente"}</td>
+    <td>
+      ${s.estado==="pendiente" ? `
+        <button class="btn btn-primary btn-mini" data-aprobar="${s.key}">Aprobar</button>
+        <button class="btn btn-outline btn-mini" data-rechazar="${s.key}">Rechazar</button>
+      ` : "-"}
+    </td>
+  `;
+  tbody.appendChild(tr);
+});
 
-    // Botones de aprobar / rechazar
-    tbody.querySelectorAll("[data-aprobar]").forEach(btn=>{
-      btn.addEventListener("click",()=> aprobarSolicitud(btn.dataset.aprobar));
-    });
-    tbody.querySelectorAll("[data-rechazar]").forEach(btn=>{
-      btn.addEventListener("click",()=> rechazarSolicitud(btn.dataset.rechazar));
-    });
+// Ahora sí los listeners, una vez añadidas las filas
 
-  }catch(err){
-    console.error("Error cargando solicitudes:",err);
-    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:#f66;">Error al cargar solicitudes</td></tr>`;
-  }
-}
+tbody.querySelectorAll("[data-aprobar]").forEach(btn=>{
+  btn.addEventListener("click",()=> aprobarSolicitud(btn.dataset.aprobar));
+});
+
+tbody.querySelectorAll("[data-rechazar]").forEach(btn=>{
+  btn.addEventListener("click",()=> rechazarSolicitud(btn.dataset.rechazar));
+});
+
 
 async function aprobarSolicitud(key){
   const snap = await get(ref(db, "erp_prensas/solicitudes_recetas/"+key));
@@ -927,24 +930,34 @@ async function aprobarSolicitud(key){
   matrizRef: s.matrizRef,
   descripcion: s.matrizRef,
   comentario: "Receta aprobada desde solicitud",
+
   vPrensaMin: s.parametros.vPrensa ?? null,
   vPrensaMax: s.parametros.vPrensa ?? null,
+
   vPullerMin: s.parametros.vPuller ?? null,
   vPullerMax: s.parametros.vPuller ?? null,
+
   tempMin: s.parametros.tempTocho ?? null,
   tempMax: s.parametros.tempTocho ?? null,
+
   tempMatrizMin: s.parametros.tempMatriz ?? null,
   tempMatrizMax: s.parametros.tempMatriz ?? null,
+
   tempContMin: s.parametros.tempContenedor ?? null,
   tempContMax: s.parametros.tempContenedor ?? null,
+
   tensionMin: s.parametros.tension ?? null,
   tensionMax: s.parametros.tension ?? null,
+
   diamArepasMin: s.parametros.diamArepas ?? null,
   diamArepasMax: s.parametros.diamArepas ?? null,
+
   copiaNo: s.copiaNo ?? null,
+
   updatedBy: auth.currentUser?.email || "sistema",
-  updatedAt: new Date().toISOString()
+  updatedAt: new Date().toISOString(),
 };
+
 
 
   const copia = s.copiaNo || "base";
@@ -1175,6 +1188,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
