@@ -851,73 +851,81 @@ async function cargarAlertas() {
 }
 
 /* === SOLICITUDES DE RECETAS === */
-$("#btnCargarSolicitudes").addEventListener("click", cargarSolicitudesRecetas);
-
-async function cargarSolicitudesRecetas(){
+async function cargarSolicitudesRecetas() {
   const tbody = $("#tblSolicitudes tbody");
-  tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:#999;">Cargando...</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;color:#999;">Cargando...</td></tr>`;
 
-  try{
+  try {
     const snap = await get(ref(db, "erp_prensas/solicitudes_recetas"));
-    if(!snap.exists()){
-      tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;color:#999;">Sin solicitudes pendientes</td></tr>`;
+
+    if (!snap.exists()) {
+      tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;color:#999;">Sin solicitudes pendientes</td></tr>`;
       return;
     }
 
     const datos = Object.entries(snap.val())
-      .map(([k,v])=>({...v,key:k}))
-      .sort((a,b)=> new Date(b.creadoEn) - new Date(a.creadoEn));
+      .map(([k, v]) => ({ ...v, key: k }))
+      .sort((a, b) => new Date(b.creadoEn) - new Date(a.creadoEn));
 
     tbody.innerHTML = "";
-    datos.forEach(s=>{
-      const colorEstado = s.estado==="aprobado" ? "#16c784" :
-                          s.estado==="rechazado" ? "#ff4b6a" : "#ffae00";
+
+    datos.forEach((s) => {
+      const colorEstado =
+        s.estado === "aprobado"
+          ? "#16c784"
+          : s.estado === "rechazado"
+          ? "#ff4b6a"
+          : "#ffae00";
 
       const tr = document.createElement("tr");
-      tbody.innerHTML = "";
+      tr.innerHTML = `
+        <td>${s.fecha || ""}</td>
+        <td>${s.prensa || ""}</td>
+        <td>${s.matrizRef || ""}</td>
+        <td>${s.copiaNo || "-"}</td>
+        <td>${s.operador || ""}</td>
+        <td>${s.supervisor || ""}</td>
+        <td>${s.parametros?.vPrensa ?? ""}</td>
+        <td>${s.parametros?.vPuller ?? ""}</td>
+        <td>${s.parametros?.tempTocho ?? ""}</td>
+        <td>${s.parametros?.tempMatriz ?? ""}</td>
+        <td>${s.parametros?.tempContenedor ?? ""}</td>
+        <td>${s.parametros?.tension ?? ""}</td>
+        <td>${s.parametros?.diamArepas ?? ""}</td>
+        <td style="color:${colorEstado};font-weight:600;">${
+        s.estado || "pendiente"
+      }</td>
+        <td>
+          ${
+            s.estado === "pendiente"
+              ? `
+          <button class="btn btn-primary btn-mini" data-aprobar="${s.key}">Aprobar</button>
+          <button class="btn btn-outline btn-mini" data-rechazar="${s.key}">Rechazar</button>
+        `
+              : "-"
+          }
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
 
-datos.forEach(s=>{
-  const colorEstado =
-    s.estado === "aprobado" ? "#16c784" :
-    s.estado === "rechazado" ? "#ff4b6a" :
-    "#ffae00";
+    // LISTENERS UNA SOLA VEZ
+    tbody.querySelectorAll("[data-aprobar]").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        aprobarSolicitud(btn.dataset.aprobar)
+      );
+    });
 
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td>${s.fecha||""}</td>
-    <td>${s.prensa||""}</td>
-    <td>${s.matrizRef||""}</td>
-    <td>${s.copiaNo || "-"}</td>
-    <td>${s.operador||""}</td>
-    <td>${s.supervisor||""}</td>
-    <td>${s.parametros?.vPrensa??""}</td>
-    <td>${s.parametros?.vPuller??""}</td>
-    <td>${s.parametros?.tempTocho??""}</td>
-    <td>${s.parametros?.tempMatriz??""}</td>
-    <td>${s.parametros?.tempContenedor??""}</td>
-    <td>${s.parametros?.tension??""}</td>
-    <td>${s.parametros?.diamArepas ?? ""}</td>
-    <td style="color:${colorEstado};font-weight:600;">${s.estado||"pendiente"}</td>
-    <td>
-      ${s.estado==="pendiente" ? `
-        <button class="btn btn-primary btn-mini" data-aprobar="${s.key}">Aprobar</button>
-        <button class="btn btn-outline btn-mini" data-rechazar="${s.key}">Rechazar</button>
-      ` : "-"}
-    </td>
-  `;
-  tbody.appendChild(tr);
-});
-
-// Ahora sí los listeners, una vez añadidas las filas
-
-tbody.querySelectorAll("[data-aprobar]").forEach(btn=>{
-  btn.addEventListener("click",()=> aprobarSolicitud(btn.dataset.aprobar));
-});
-
-tbody.querySelectorAll("[data-rechazar]").forEach(btn=>{
-  btn.addEventListener("click",()=> rechazarSolicitud(btn.dataset.rechazar));
-});
-
+    tbody.querySelectorAll("[data-rechazar]").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        rechazarSolicitud(btn.dataset.rechazar)
+      );
+    });
+  } catch (err) {
+    console.error("Error cargando solicitudes:", err);
+    tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;color:#ff6b6b;">Error al cargar solicitudes</td></tr>`;
+  }
+}
 
 async function aprobarSolicitud(key){
   const snap = await get(ref(db, "erp_prensas/solicitudes_recetas/"+key));
@@ -1188,6 +1196,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
