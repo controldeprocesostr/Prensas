@@ -619,16 +619,17 @@ $("#copiaNo").value = r.copiaNo ?? "";
 
 $("#btnLimpiarReceta").addEventListener("click",()=>{
   [
-  "rcMatriz","rcDesc","rcComentario",
-  "rcVPmin","rcVPmax","rcVUmin","rcVUmax",
-  "rcTmin","rcTmax",
-  "rcTMatrizMin","rcTMatrizMax",
-  "rcTContMin","rcTContMax"
-]
- 
-recetaSeleccionadaKey = null;   // ← muy importante
+    "rcMatriz","rcDesc","rcComentario",
+    "rcVPmin","rcVPmax","rcVUmin","rcVUmax",
+    "rcTmin","rcTmax",
+    "rcTMatrizMin","rcTMatrizMax",
+    "rcTContMin","rcTContMax",
+    "tensionMin","tensionMax",
+    "diamArepasMin","diamArepasMax",
+    "copiaNo"
+  ].forEach(id => document.getElementById(id).value = "");
 
-    .forEach(id=> document.getElementById(id).value="");
+  recetaSeleccionadaKey = null;   // ← muy importante
 });
 
 $("#btnGuardarReceta").addEventListener("click", async()=>{
@@ -976,54 +977,87 @@ async function rechazarSolicitud(key){
 
 /* === HISTORIAL DE RECETAS === */
 $("#btnVerHistorial").addEventListener("click", async()=>{
+
   const matriz = $("#histMatriz").value.trim();
   const tbody = $("#tblHistorial tbody");
-  $("#btnVerHistorial").textContent = `Ver historial (${matriz})`;
   tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Cargando...</td></tr>`;
-  if(!matriz){ alert("Ingresa un código de matriz."); return; }
+
+  if(!matriz){
+    alert("Ingresa un código de matriz.");
+    return;
+  }
+
+  // 🔹 Normalizar matriz para generar prefijo de búsqueda
+  const claveBase = matrizKey(matriz);   // EJ: "HOR_012"
+  
+  // 🔹 Ruta donde viven los historiales
+  const refLogs = ref(db, "erp_prensas/recetas_log");
 
   try{
-    if (!recetaSeleccionadaKey) {
-  alert("Seleccione una receta desde la tabla antes de ver historial.");
-  return;
-}
-
-const snap = await get(ref(db, `erp_prensas/recetas_log/${recetaSeleccionadaKey}`));
-
-
-
+    const snap = await get(refLogs);
     if(!snap.exists()){
       tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Sin historial registrado</td></tr>`;
       return;
     }
-    const datos = Object.values(snap.val()).sort((a,b)=> new Date(b.fecha)-new Date(a.fecha));
+
+    const raw = snap.val();
+    const matchingKeys = Object.keys(raw)
+      .filter(k => k.startsWith(claveBase));  
+      // EJ: "HOR_012_base", "HOR_012_1", "HOR_012_2"
+
+    if(matchingKeys.length === 0){
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">
+        No hay historial para esta matriz ni para sus copias
+      </td></tr>`;
+      return;
+    }
+
+    // 🔹 Unir todos los logs de todas las copias
+    let logs = [];
+
+    matchingKeys.forEach(copyKey=>{
+      const bloques = raw[copyKey];
+      Object.values(bloques).forEach(entry=>{
+        logs.push({
+          ...entry,
+          copia: copyKey.replace(claveBase + "_", "") // muestra base o número
+        });
+      });
+    });
+
+    // Ordenar por fecha descendente
+    logs.sort((a,b)=> new Date(b.fecha) - new Date(a.fecha));
+
+    // Pintar filas
     tbody.innerHTML = "";
-    datos.forEach(l=>{
-      const tr=document.createElement("tr");
+    logs.forEach(l=>{
+      const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${l.fecha ? l.fecha.replace("T"," ").slice(0,19) : ""}</td>
-        <td>${l.accion}</td>
+        <td>${l.accion} (copia: <b>${l.copia}</b>)</td>
         <td>${l.realizadoPor}</td>
         <td>
-  ${l.cambios && typeof l.cambios === "object"
-    ? Object.entries(l.cambios).map(([campo, vals]) => 
-        `<div style="margin-bottom:3px;">
-          <b>${campo}</b>: <span style="color:#ffae00;">${vals.antes}</span> → 
-          <span style="color:#00e5ff;">${vals.ahora}</span>
-        </div>`
-      ).join("")
-    : `<span style="color:#666;">${l.cambios || "(sin cambios detectados)"}</span>`}
-</td>
-
+          ${l.cambios && typeof l.cambios === "object"
+            ? Object.entries(l.cambios).map(([campo, vals]) => 
+                `<div style="margin-bottom:3px;">
+                  <b>${campo}</b>: 
+                  <span style="color:#ffae00;">${vals.antes}</span> → 
+                  <span style="color:#00e5ff;">${vals.ahora}</span>
+                </div>`
+              ).join("")
+            : `<span style="color:#666;">${l.cambios || "(sin cambios detectados)"}</span>`}
+        </td>
       `;
       tbody.appendChild(tr);
     });
+
   }catch(err){
-    console.error("Error cargando historial:",err);
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#f66;">Error al cargar historial</td></tr>`;
+    console.error("Error cargando historial:", err);
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#f66;">
+      Error al cargar historial
+    </td></tr>`;
   }
 });
-
 
 /* === ESCUCHAR NUEVAS SOLICITUDES EN TIEMPO REAL === */
 const sound = $("#alertSound");
@@ -1141,6 +1175,7 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
 
 
 
