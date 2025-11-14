@@ -486,6 +486,8 @@ const $ = (s)=>document.querySelector(s);
 
 let chartMotivos;
 let knownAlertKeys = new Set();
+let recetaSeleccionadaKey = null;  // ← NUEVO
+
 
 /* === SERVICE WORKER PWA (recetas) === */
 if('serviceWorker' in navigator){
@@ -582,12 +584,14 @@ function initRecetas(){
     });
 
     tbody.querySelectorAll("button[data-m]").forEach(btn=>{
-      btn.addEventListener("click",()=>{
-        const k = btn.dataset.m;
-        const r = snap.val()[k];
-        cargarRecetaEnFormulario(r);
-      });
-    });
+  btn.addEventListener("click",()=>{
+
+    recetaSeleccionadaKey = btn.dataset.m;   // ← CLAVE REAL GUARDADA
+
+    const r = snap.val()[recetaSeleccionadaKey];
+    cargarRecetaEnFormulario(r);
+  });
+});
   });
 }
 
@@ -621,6 +625,8 @@ $("#btnLimpiarReceta").addEventListener("click",()=>{
   "rcTMatrizMin","rcTMatrizMax",
   "rcTContMin","rcTContMax"
 ]
+ 
+recetaSeleccionadaKey = null;   // ← muy importante
 
     .forEach(id=> document.getElementById(id).value="");
 });
@@ -633,9 +639,18 @@ $("#btnGuardarReceta").addEventListener("click", async()=>{
   if(!matriz){alert("Indica una matriz.");return;}
 
   // 🔹 Construir clave única usando matriz + copia
-  const copia = $("#copiaNo").value.trim() || "base";
-  const recetaKey = `${matrizKey(matriz)}_${copia || "base"}`;
-  const recetaRef = ref(db, "erp_prensas/recetas/" + recetaKey);
+  let copia = $("#copiaNo").value.trim() || "base";
+
+// Si estoy EDITANDO una receta existente
+let recetaKey = recetaSeleccionadaKey;
+
+// Si estoy creando una receta nueva
+if (!recetaKey) {
+  recetaKey = `${matrizKey(matriz)}_${copia}`;
+}
+
+const recetaRef = ref(db, "erp_prensas/recetas/" + recetaKey);
+
   const snapAnterior = await get(recetaRef);
   const anterior = snapAnterior.exists() ? snapAnterior.val() : {};
 
@@ -872,7 +887,8 @@ async function cargarSolicitudesRecetas(){
   <td>${s.parametros?.tempMatriz??""}</td>
   <td>${s.parametros?.tempContenedor??""}</td>
   <td>${s.parametros?.tension??""}</td>
-  <td>${s.parametros?.diamArepas??""}</td>
+  <td>${s.parametros?.diamArepas ?? ""}</td>
+
 
         <td style="color:${colorEstado};font-weight:600;">${s.estado||"pendiente"}</td>
         <td>
@@ -962,13 +978,18 @@ async function rechazarSolicitud(key){
 $("#btnVerHistorial").addEventListener("click", async()=>{
   const matriz = $("#histMatriz").value.trim();
   const tbody = $("#tblHistorial tbody");
-  $("#btnVerHistorial").textContent = `Ver historial (${matriz} - ${copia})`;
+  $("#btnVerHistorial").textContent = `Ver historial (${matriz})`;
   tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#999;">Cargando...</td></tr>`;
   if(!matriz){ alert("Ingresa un código de matriz."); return; }
 
   try{
-    const copia = $("#copiaNo").value.trim() || "base";
-const snap = await get(ref(db, `erp_prensas/recetas_log/${matrizKey(matriz)}_${copia}`));
+    if (!recetaSeleccionadaKey) {
+  alert("Seleccione una receta desde la tabla antes de ver historial.");
+  return;
+}
+
+const snap = await get(ref(db, `erp_prensas/recetas_log/${recetaSeleccionadaKey}`));
+
 
 
     if(!snap.exists()){
@@ -1120,6 +1141,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
