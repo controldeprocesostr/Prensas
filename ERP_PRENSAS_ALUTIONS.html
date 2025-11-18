@@ -1200,7 +1200,7 @@ async function guardarRegistro(){
     prensa:       $("#selPrensa").value,
     cliente:      $("#inpCliente").value,
     soItem:       $("#inpSOItem").value,
-    copiaNo:      $("#inpCopiaNo").value,
+    copiaNo: ($("#inpCopiaNo").value.trim() === "" ? "base" : $("#inpCopiaNo").value.trim()),
     matrizRef:    $("#inpMatriz").value,
     pesoBrutoKg:  Number($("#inpPesoBruto").value || 0),
 
@@ -1273,7 +1273,9 @@ async function validarContraReceta(data){
 
   try{
     // 🔹 Clave unificada por matriz + copia
-    const recetaKey = `${matrizKey(data.matrizRef)}_${data.copiaNo || "base"}`;
+    let copia = (data.copiaNo === "" || data.copiaNo == null) ? "base" : data.copiaNo;
+const recetaKey = `${matrizKey(data.matrizRef)}_${copia}`;
+
     const snap = await get(ref(db, "erp_prensas/recetas/" + recetaKey));
     if(!snap.exists()) return;
 
@@ -1787,6 +1789,8 @@ function descargarXlsxFiltrado(){
 </script>
 </body>
 </html>
+
+
 
 
 
