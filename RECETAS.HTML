@@ -127,7 +127,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 <div class="topbar">
   <div class="app-title">
     <span class="dot"></span>
-    <div><div style="font-size:12px;">Módulo Recetas & KPIs</div><strong>ERP PRENSAS</strong></div>
+    <div><div style="font-size:12px;">Módulo Recetas & KPIs</div><strong>ERP PRENSASss</strong></div>
   </div>
   <div class="topbar-right">
     <div class="pill" id="lblUser"></div>
@@ -907,7 +907,7 @@ async function cargarSolicitudesRecetas() {
         <td>${s.fecha || ""}</td>
         <td>${s.prensa || ""}</td>
         <td>${s.matrizRef || ""}</td>
-        <td>${s.copiaNo || "-"}</td>
+        <td>${s.parametros?.copiaNo ?? "-"}</td>
         <td>${s.operador || ""}</td>
         <td>${s.supervisor || ""}</td>
         <td>${s.parametros?.vPrensa ?? ""}</td>
@@ -985,7 +985,8 @@ async function aprobarSolicitud(key){
   diamArepasMin: s.parametros.diamArepas ?? null,
   diamArepasMax: s.parametros.diamArepas ?? null,
 
-  copiaNo: s.copiaNo ?? null,
+  copiaNo: s.parametros?.copiaNo ?? "base",
+
 
   updatedBy: auth.currentUser?.email || "sistema",
   updatedAt: new Date().toISOString(),
@@ -993,14 +994,16 @@ async function aprobarSolicitud(key){
 
 
 
-  const copia = s.copiaNo || "base";
+  const copia = s.parametros?.copiaNo ?? "base";
+
 await set(ref(db, "erp_prensas/recetas/" + `${matrizKey(s.matrizRef)}_${copia}`), receta);
 
   await set(ref(db, "erp_prensas/solicitudes_recetas/" + key + "/estado"), "aprobado");
 
   // 🔹 Guardar log de aprobación
   const logKey = Date.now();
-  const logRef = ref(db, `erp_prensas/recetas_log/${matrizKey(s.matrizRef)}_${s.copiaNo || "base"}/${logKey}`);
+  const logRef = ref(db, `erp_prensas/recetas_log/${matrizKey(s.matrizRef)}_${copia}/${logKey}`);
+
 
   await set(logRef, {
     accion: "aprobacion_solicitud",
@@ -1134,7 +1137,7 @@ function mostrarNotificacionReceta(data){
     <div class="toast-title">📨 Nueva propuesta de receta</div>
     <div class="toast-body">
       <b>Matriz:</b> ${data.matrizRef || "N/A"}<br>
-      <b>Copia:</b> ${data.copiaNo || "-"}<br>
+      <b>Copia:</b> ${data.parametros?.copiaNo ?? "-"}<br>
       <b>Prensa:</b> ${data.prensa || "?"} — <b>Supervisor:</b> ${data.supervisor || "?"}
     </div>
     <div class="toast-actions">
@@ -1221,6 +1224,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
