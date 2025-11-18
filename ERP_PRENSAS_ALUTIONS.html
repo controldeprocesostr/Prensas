@@ -405,7 +405,7 @@ h1,h2,h3{font-weight:500;}
       <span class="dot"></span>
       <div>
         <div style="font-size:12px;">PRENSAS</div>
-        <strong>ALUTIONS – Registro</strong>
+        <strong>ALUTIONS – Registros</strong>
       </div>
     </div>
     <div class="topbar-right">
@@ -1600,15 +1600,17 @@ async function proponerComoReceta(reg){
     operador:    reg.operador || "",
     supervisor:  reg.supervisor || "",
     reporteId:   reg.id,          // vínculo al registro original
-    parametros: {
+   parametros: {
   vPrensa:        reg.vPrensa ?? null,
   vPuller:        reg.vPuller ?? null,
   tempTocho:      reg.temp ?? null,
   tempMatriz:     reg.tempMatriz ?? null,
   tempContenedor: reg.tempCont ?? null,
   tension:        reg.tension ?? null,
-  diamArepas:     reg.diamArepas ?? null
+  diamArepas:     reg.diamArepas ?? null,
+  copiaNo:        reg.copiaNo ?? "base"   // 🔥 AHORA SÍ SE ENVÍA
 },
+
 
     estado:      "pendiente",
     creadoPor:   correoActual,
@@ -1638,6 +1640,7 @@ try {
 } catch(e){
   console.warn("No se pudo registrar notificación:", e);
 }
+
 
 
 // Toast pequeño abajo a la derecha para esta acción
@@ -1789,6 +1792,8 @@ function descargarXlsxFiltrado(){
 </script>
 </body>
 </html>
+
+
 
 
 
