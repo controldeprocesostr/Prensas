@@ -652,19 +652,27 @@ $("#btnGuardarReceta").addEventListener("click", async()=>{
   const matriz = $("#rcMatriz").value.trim();
   if(!matriz){alert("Indica una matriz.");return;}
 
-  // 🔹 Construir clave única usando matriz + copia
-  let copia = $("#copiaNo").value.trim() || "base";
+  // ================================
+// 🔥 CORRECCIÓN DEFINITIVA COPIA
+// ================================
+let copiaInput = $("#copiaNo").value.trim();
 
-// Si estoy EDITANDO una receta existente
-let recetaKey;
-
-// 🟢 Siempre construir clave con matriz + copia
+// SI ESTOY EDITANDO → tomar la copia desde la KEY real guardada
 if (recetaSeleccionadaKey) {
-  // Si estoy editando, siempre reconstruyo la clave correctamente
-  recetaKey = `${matrizKey(matriz)}_${copia}`;
-} else {
-  recetaKey = `${matrizKey(matriz)}_${copia}`;
+  const partes = recetaSeleccionadaKey.split("_");
+  copiaInput = partes[1] || copiaInput;
 }
+
+// NORMALIZACIÓN DE COPIA
+let copia = (
+  copiaInput === "" ||
+  copiaInput === "0" ||
+  copiaInput.toLowerCase() === "base"
+) ? "base" : String(copiaInput);
+
+// Construcción final de clave
+const recetaKey = `${matrizKey(matriz)}_${copia}`;
+
 
 const recetaRef = ref(db, "erp_prensas/recetas/" + recetaKey);
 
@@ -691,7 +699,8 @@ const recetaRef = ref(db, "erp_prensas/recetas/" + recetaKey);
     tensionMax: Number($("#tensionMax").value || 0),
     diamArepasMin: Number($("#diamArepasMin").value || 0),
     diamArepasMax: Number($("#diamArepasMax").value || 0),
-    copiaNo: Number($("#copiaNo").value || 0),
+    copiaNo: copia,
+
   };
 
   // 🔹 Guardar receta completa en Firebase
@@ -1212,6 +1221,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
