@@ -1516,19 +1516,17 @@ async function proponerComoReceta(reg){
     cliente:     reg.cliente || "",
     operador:    reg.operador || "",
     supervisor:  reg.supervisor || "",
-    reporteId:   reg.id,          // vínculo al registro original
-   parametros: {
-  vPrensa:        reg.vPrensa ?? null,
-  vPuller:        reg.vPuller ?? null,
-  tempTocho:      reg.temp ?? null,
-  tempMatriz:     reg.tempMatriz ?? null,
-  tempContenedor: reg.tempCont ?? null,
-  tension:        reg.tension ?? null,
-  diamArepas:     reg.diamArepas ?? null,
-  copiaNo:        reg.copiaNo ?? "base"   // 🔥 AHORA SÍ SE ENVÍA
-},
-
-
+    reporteId:   reg.id,
+    parametros: {
+      vPrensa:        reg.vPrensa ?? null,
+      vPuller:        reg.vPuller ?? null,
+      tempTocho:      reg.temp ?? null,
+      tempMatriz:     reg.tempMatriz ?? null,
+      tempContenedor: reg.tempCont ?? null,
+      tension:        reg.tension ?? null,
+      diamArepas:     reg.diamArepas ?? null,
+      copiaNo:        reg.copiaNo ?? "base"
+    },
     estado:      "pendiente",
     creadoPor:   correoActual,
     creadoEn:    new Date().toISOString()
@@ -1536,27 +1534,26 @@ async function proponerComoReceta(reg){
 
   try{
     await push(ref(db,"erp_prensas/solicitudes_recetas"), payload);
+
+    // 🔔 Notificación al coordinador – AHORA SÍ ADENTRO
+    const noti = {
+      title: "Nueva propuesta de receta",
+      body: `Matriz ${reg.matrizRef || "?"} · Copia ${reg.copiaNo || "-"} · ${reg.prensa || ""}`,
+      timestamp: new Date().toISOString(),
+      tipo: "solicitud_receta"
+    };
+    await push(ref(db,"erp_prensas/notificaciones"), noti);
+
     mostrarToastReceta(
       `Propuesta enviada para matriz ${payload.matrizRef||"-"} · ${payload.prensa||""}`
     );
+
   }catch(err){
     console.error("Error guardando propuesta de receta:", err);
     alert("Error al enviar la propuesta de receta.");
   }
 }
 
-// 🔔 Notificación al coordinador (entrada visible en solicitudes)
-try {
-  const noti = {
-    title: "Nueva propuesta de receta",
-    body: `Matriz ${reg.matrizRef || "?"} · Copia ${reg.copiaNo || "-"} · ${reg.prensa || ""}`,
-    timestamp: new Date().toISOString(),
-    tipo: "solicitud_receta"
-  };
-  await push(ref(db, "erp_prensas/notificaciones"), noti);
-} catch(e){
-  console.warn("No se pudo registrar notificación:", e);
-}
 
 
 
@@ -1709,6 +1706,8 @@ function descargarXlsxFiltrado(){
 </script>
 </body>
 </html>
+
+
 
 
 
