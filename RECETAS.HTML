@@ -127,7 +127,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);}
 <div class="topbar">
   <div class="app-title">
     <span class="dot"></span>
-    <div><div style="font-size:12px;">Módulo Recetas & KPIs</div><strong>ERP PRENSASss</strong></div>
+    <div><div style="font-size:12px;">Módulo Recetas & KPIs</div><strong>ERP PRENSAS</strong></div>
   </div>
   <div class="topbar-right">
     <div class="pill" id="lblUser"></div>
@@ -934,6 +934,11 @@ async function cargarSolicitudesRecetas() {
       tbody.appendChild(tr);
     });
 
+// === ASIGNAR BOTÓN "ACTUALIZAR" DE SOLICITUDES ===
+document.getElementById("btnCargarSolicitudes")
+  .addEventListener("click", cargarSolicitudesRecetas);
+
+
     // LISTENERS UNA SOLA VEZ
     tbody.querySelectorAll("[data-aprobar]").forEach((btn) => {
       btn.addEventListener("click", () =>
@@ -1224,6 +1229,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
