@@ -934,9 +934,6 @@ async function cargarSolicitudesRecetas() {
       tbody.appendChild(tr);
     });
 
-// === ASIGNAR BOTÓN "ACTUALIZAR" DE SOLICITUDES ===
-document.getElementById("btnCargarSolicitudes")
-  .addEventListener("click", cargarSolicitudesRecetas);
 
 
     // LISTENERS UNA SOLA VEZ
@@ -956,6 +953,10 @@ document.getElementById("btnCargarSolicitudes")
     tbody.innerHTML = `<tr><td colspan="15" style="text-align:center;color:#ff6b6b;">Error al cargar solicitudes</td></tr>`;
   }
 }
+
+// === ASIGNAR BOTÓN "ACTUALIZAR" DE SOLICITUDES (CORRECTO) ===
+document.getElementById("btnCargarSolicitudes")
+  .addEventListener("click", cargarSolicitudesRecetas);
 
 async function aprobarSolicitud(key){
   const snap = await get(ref(db, "erp_prensas/solicitudes_recetas/"+key));
@@ -1229,6 +1230,8 @@ function showToast(titulo, cuerpo, alerta){
        preload="auto"></audio>
 </body>
 </html>
+
+
 
 
 
