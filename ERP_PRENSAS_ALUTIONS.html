@@ -817,7 +817,8 @@ $("#inpFecha").addEventListener("change", actualizarEtiquetaFechaTurno);
 $("#selTurno").addEventListener("change", actualizarEtiquetaFechaTurno);
 
 /* === AUTO-CARGA DESDE API DE PRODUCCIÓN === */
-const API_URL = "https://optima.tecnoglass.net/api/alutions_production/reporte-extruccion";
+const API_URL = null; // API DESACTIVADA
+
 
 /* Conversión 24h local (asumiendo el navegador ya está en hora Colombia o correcta) */
 function convertirHoraColombia24(horaStr){
@@ -850,72 +851,8 @@ function turnoToShift(turno){
   return null;
 }
 
-/* Llamado a la API filtrando por prensa, SO-ITEM y shift */
-async function buscarProduccion(prensa, soitem){
-  try{
-    const fechaUI  = $("#inpFecha").value || hoyISO();
-    const turnoUI  = $("#selTurno").value;
-    const shiftReq = turnoToShift(turnoUI);
-
-    const body = {
-      Fecha_inicial: fechaUI,
-      Fecha_final:   fechaUI,
-      Departamento:  null
-    };
-
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if(!data?.data?.length) return [];
-
-    const resultados = [];
-    const soBuscado = soitem.replace(/\s+/g,"").trim();
-    const prensaBuscada = prensa.trim();
-
-    for(const item of data.data){
-      if(!item.Prensa) continue;
-
-      for(const r of item.Prensa){
-        const claveApi   = `${r.so}-${r.Soitem}`;
-        const maquinaAPI = (r.Maquina || "").trim();
-        const shiftAPI   = Number(r.shift);
-
-        if(
-          maquinaAPI === prensaBuscada &&
-          claveApi === soBuscado &&
-          (!shiftReq || shiftAPI === shiftReq)
-        ){
-          const hIni24 = convertirHoraColombia24(r.HoraInicial);
-          const hFin24 = convertirHoraColombia24(r.HoraFinal);
-          resultados.push({
-            ...r,
-            horaInicial24: hIni24,
-            horaFinal24:   hFin24,
-            horaInicial12: formato12h(hIni24),
-            horaFinal12:   formato12h(hFin24)
-          });
-        }
-      }
-    }
-
-    if(resultados.length){
-      mostrarModalSeleccion(resultados);
-    }else{
-      alert("No se encontraron registros para esa combinación (prensa, SO-ITEM y turno).");
-    }
-
-    return resultados;
-
-  }catch(err){
-    console.error("Error buscando producción:", err);
-    alert("Error al conectar con la API de producción.");
-    return [];
-  }
+async function buscarProduccion(){
+  return [];
 }
 
 /* Llenar automáticamente los campos del formulario */
@@ -1024,30 +961,10 @@ function mostrarModalSeleccion(lista){
   fondo.addEventListener("click",(e)=>{ if(e.target===fondo) fondo.remove(); });
 }
 
-/* Evento del botón de búsqueda 🔍 */
-$("#btnBuscarAPI").addEventListener("click", async()=>{
-  const prensa = $("#selPrensa").value?.trim();
-  const soitem = $("#inpSOItem").value?.trim();
-  if(!prensa || !soitem){
-    alert("Selecciona prensa e ingresa un SO-ITEM válido.");
-    return;
-  }
-
-  const loader = document.createElement("div");
-  loader.style = `
-    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-    background:#000a;color:var(--accent);font-size:14px;z-index:200;
-  `;
-  loader.textContent = "⏳ Cargando producción...";
-  document.body.appendChild(loader);
-
-  const resultados = await buscarProduccion(prensa, soitem);
-  loader.remove();
-
-  if(!resultados.length){
-    alert("No se encontraron registros para esa combinación.");
-  }
+/$("#btnBuscarAPI").addEventListener("click", ()=>{
+  alert("🔍 La búsqueda automática por API está temporalmente deshabilitada.");
 });
+
 
 /* === CATÁLOGOS (Motivos / Prensas) === */
 async function cargarCatalogos(){
@@ -1792,6 +1709,7 @@ function descargarXlsxFiltrado(){
 </script>
 </body>
 </html>
+
 
 
 
