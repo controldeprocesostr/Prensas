@@ -1684,9 +1684,9 @@ function descargarXlsxFiltrado(){
 
   // Fila de totales: TOTAL en col 19 y 20 (Cant. Tochos y Peso Bruto)
   const totalRow = new Array(headers.length).fill("");
-totalRow[21] = "TOTAL:";
-totalRow[22] = totalCant;
-totalRow[23] = totalPeso;
+totalRow[20] = "TOTAL:";
+totalRow[21] = totalCant;
+totalRow[22] = totalPeso;
 aoa.push(totalRow);
 
 
@@ -1726,3 +1726,4 @@ aoa.push(totalRow);
 </script>
 </body>
 </html>
+
