@@ -1604,15 +1604,33 @@ function descargarXlsxFiltrado(){
   const turno      = first.turno || "";
 
   const headers = [
-  "N°","SO-ITEM","CLIENTE","MATRIZ REF.","COPIA No.",
-  "TENSIÓN (N)","Ø AREPAS (mm)",
-  "H.INICIAL","H.FINAL",
-  "VEL. PRENSA MM/SEG","VEL. PULLER MM/SEG",
-  "ROMPIMIENTO (BAR)","TRABAJO (BAR)","PRESIÓN SELLADO (BAR)",
-  "ALEACIÓN","TIPO","LONG. (mm)","COLADA",
-  "TEMP MATRIZ (°C)","TEMP CONTENEDOR (°C)","TEMP TOCHO (°C)",
-  "CANT. TOCHOS","PESO BRUTO (kg)","CÓDIGO MOTIVO"
+  "N°",
+  "SO-ITEM",
+  "CLIENTE",
+  "MATRIZ REF.",
+  "COPIA No.",
+  "TENSIÓN (N)",
+  "Ø AREPAS (mm)",
+  "H.INICIAL",
+  "H.FINAL",
+  "VEL. PRENSA MM/SEG",
+  "VEL. PULLER MM/SEG",
+  "ROMPIMIENTO (BAR)",
+  "TRABAJO (BAR)",
+  "SELLADO (BAR)",
+  "ALEACIÓN",
+  "TIPO TOCHO",
+  "LONG. (mm)",
+  "COLADA",
+  "TEMP TOCHO (°C)",
+  "TEMP MATRIZ (°C)",
+  "TEMP CONTENEDOR (°C)",
+  "CANT. TOCHOS",
+  "PESO BRUTO (kg)",
+  "CÓDIGO MOTIVO",
+  "OBSERVACIÓN"
 ];
+
 
 
   const aoa = [];
@@ -1633,43 +1651,44 @@ function descargarXlsxFiltrado(){
     totalPeso += Number(r.pesoBrutoKg||0);
 
     aoa.push([
-      idx+1,
-      r.soItem || "",
-      r.cliente || "",
-      r.matrizRef || "",
-      r.copiaNo || "",
-      r.copiaNo || "",
-      r.tension ?? "",
-      r.diamArepas ?? "",
-      r.hIni || "",
-      r.hIni || "",
-      r.hFin || "",
-      r.vPrensa ?? "",
-      r.vPuller ?? "",
-      r.pRomp ?? "",
-      r.pTrab ?? "",
-      r.pSell ?? "",
-      r.aleacion || "",
-      r.tipoTocho || "",
-      r.longTocho ?? "",
-      r.colada || "",
-      r.tempMatriz ?? "",
-      r.tempCont ?? "",
-      r.temp ?? "",
-      r.cantTochos ?? "",
-      r.pesoBrutoKg ?? "",
-      r.motivoCod || ""
-    ]);
+  idx+1,                     // N°
+  r.soItem || "",            // SO-ITEM
+  r.cliente || "",           // CLIENTE
+  r.matrizRef || "",         // MATRIZ REF.
+  r.copiaNo || "",           // COPIA No.
+  r.tension ?? "",           // TENSIÓN
+  r.diamArepas ?? "",        // Ø AREPAS
+  r.hIni || "",              // H.INICIAL
+  r.hFin || "",              // H.FINAL
+  r.vPrensa ?? "",           // V. PRENSA
+  r.vPuller ?? "",           // V. PULLER
+  r.pRomp ?? "",             // ROMPIMIENTO
+  r.pTrab ?? "",             // TRABAJO
+  r.pSell ?? "",             // SELLADO
+  r.aleacion || "",          // ALEACIÓN
+  r.tipoTocho || "",         // TIPO
+  r.longTocho ?? "",         // LONGITUD
+  r.colada || "",            // COLADA
+  r.temp ?? "",              // TEMP TOCHO
+  r.tempMatriz ?? "",        // TEMP MATRIZ
+  r.tempCont ?? "",          // TEMP CONT.
+  r.cantTochos ?? "",        // CANT. TOCHOS
+  r.pesoBrutoKg ?? "",       // PESO
+  r.motivoCod || "",         // MOTIVO
+  r.obs || ""                // OBSERVACIÓN
+]);
+
   });
 
   aoa.push([]);
 
   // Fila de totales: TOTAL en col 19 y 20 (Cant. Tochos y Peso Bruto)
   const totalRow = new Array(headers.length).fill("");
-  totalRow[18] = "TOTAL:";
-  totalRow[19] = totalCant;
-  totalRow[20] = totalPeso;
-  aoa.push(totalRow);
+totalRow[21] = "TOTAL:";
+totalRow[22] = totalCant;
+totalRow[23] = totalPeso;
+aoa.push(totalRow);
+
 
   const ws = XLSX.utils.aoa_to_sheet(aoa);
 
@@ -1707,25 +1726,3 @@ function descargarXlsxFiltrado(){
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
